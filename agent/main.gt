@@ -1,0 +1,15 @@
+
+data PlanItem {
+    name str
+    content str
+}
+
+data Plan {
+    items PlanItem[]
+}
+
+
+response: Plan = <? 
+    Please take the users prompt and construct a plan
+?>
+
