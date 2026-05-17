@@ -1,10 +1,10 @@
 
-
 #[derive(Debug, Clone)]
 pub struct GenericLex<T> {
     items: Vec<T>,
-    pos: usize,
+    pub pos: usize,
     len: usize,
+    pub marked_pos: usize,
 }
 
 impl<T> GenericLex<T> {
@@ -15,6 +15,7 @@ impl<T> GenericLex<T> {
             items: items,
             pos: 0,
             len: vec_len-1,
+            marked_pos: 0,
          };
          return l;
     }
@@ -63,6 +64,52 @@ impl<T> GenericLex<T> {
             return true;
         }
         return false
+    }
+
+
+    pub fn go_to(&mut self, i: usize) {
+        self.pos = i;
+    }
+
+    pub fn pos(&self) -> usize {
+        return self.pos.clone();
+    }
+
+
+    // returns true is we found the search target
+    pub fn  next_until(&mut self, _stop_at: T) -> bool {
+        self.next();
+        loop {
+            if matches!(self.item(), _stop_at) {
+                println!("hit");
+                return true;
+            }
+            if self.at_end() {
+                return true;
+            }   
+            self.next();
+        }
+    }
+
+    pub fn mark(&mut self) {
+        self.marked_pos = self.pos;
+    }
+
+    pub fn go_to_mark(&mut self) {
+        self.pos = self.marked_pos;
+    }
+
+    pub fn collect(&mut self, mut start_index: usize, end_index: usize) -> Vec<&T> {
+        if start_index > self.len {
+            start_index = self.len;
+        }
+        let col = &self.items[start_index..end_index];
+        let mut vec = vec![];
+        for c in col {
+            vec.push(c);
+        }
+        return vec;
+
     }
 
 }

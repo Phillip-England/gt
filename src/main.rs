@@ -1,6 +1,7 @@
 use crate::err::{AppErr}; 
 
 mod err;
+mod ast;
 mod tokenizer;
 mod lexer;
 mod args;

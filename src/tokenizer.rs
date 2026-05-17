@@ -7,6 +7,7 @@ pub enum Token {
     KeywordData,
     KeywordStr,
     KeywordNum,
+    KeywordBool,
     Colon,
     OperatorAssignment,
     SymbolClosedCurlyBrace,
@@ -36,6 +37,10 @@ pub fn refine_tokens(toks: Vec<LexerToken>) -> Result<Vec<Token>, err::AppErr> {
                 }
                 if s == "num" {
                     sorted.push(Token::KeywordNum);
+                    continue;
+                }
+                if s == "bool" {
+                    sorted.push(Token::KeywordBool);
                     continue;
                 }
                 if s == "=" {
