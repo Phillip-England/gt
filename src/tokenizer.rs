@@ -5,24 +5,27 @@ use crate::{err};
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Token {
     KeywordData,
+    KeywordLet,
     KeywordStr,
     KeywordNum,
     KeywordBool,
     Colon,
+    SemiColon,
     OperatorAssignment,
-    SymbolClosedCurlyBrace,
-    SymbolOpenedCurlyBrace,
-    PromptName(String),
+    ClosedCurlyBrace,
+    OpenedCurlyBrace,
+    VariableName(String),
     Indicator(String),
     PromptStart,
     PromptEnd,
     PromptText(String),
+    EndOfFile
 
 }
 
 
-
 pub fn refine_tokens(toks: Vec<LexerToken>) -> Result<Vec<Token>, err::AppErr> {
+
     let mut sorted: Vec<Token> = vec![];
     for tok in toks {
         match tok {
@@ -48,17 +51,26 @@ pub fn refine_tokens(toks: Vec<LexerToken>) -> Result<Vec<Token>, err::AppErr> {
                     continue
                 }
                 if s == "{" {
-                    sorted.push(Token::SymbolOpenedCurlyBrace);
+                    sorted.push(Token::OpenedCurlyBrace);
+                    continue;
+                }
+                if s == "};" {
+                    sorted.push(Token::ClosedCurlyBrace);
+                    sorted.push(Token::SemiColon);
                     continue;
                 }
                 if s == "}" {
-                    sorted.push(Token::SymbolClosedCurlyBrace);
+                    sorted.push(Token::ClosedCurlyBrace);
                     continue;
                 }
                 if s.ends_with(":") {
                     s.pop();
-                    sorted.push(Token::PromptName(s));
+                    sorted.push(Token::VariableName(s));
                     sorted.push(Token::Colon);
+                    continue;
+                }
+                if s == "let" {
+                    sorted.push(Token::KeywordLet);
                     continue;
                 }
                 // if we didnt find match
@@ -72,9 +84,13 @@ pub fn refine_tokens(toks: Vec<LexerToken>) -> Result<Vec<Token>, err::AppErr> {
             },
             LexerToken::PromptStart => {
                 sorted.push(Token::PromptStart);
+            },
+            LexerToken::SemiColon => {
+                sorted.push(Token::SemiColon)
             }
         }
     }
+    sorted.push(Token::EndOfFile);
     Ok(sorted)
 }
 
@@ -116,7 +132,7 @@ pub fn derive_basic_tokens(content: String) -> Result<Vec<LexerToken>, err::AppE
                             break;
                         }
                         r.next_until('>');
-                        if r.peek_back() != '?' {
+                        if r.peek_back() != '?' || r.peek() != ';' {
                             continue;
                         }
                         let mut prompt_str = r.str_from_mark().to_string();
@@ -124,6 +140,8 @@ pub fn derive_basic_tokens(content: String) -> Result<Vec<LexerToken>, err::AppE
                         prompt_str.pop();
                         r.token_push(LexerToken::PromptText(prompt_str.trim().to_string()));
                         r.token_push(LexerToken::PromptEnd);
+                        r.token_push(LexerToken::SemiColon);
+                        r.next();
                         r.next();
                         break;
                     }
@@ -157,7 +175,8 @@ pub enum LexerToken {
     Indicator(String),
     PromptEnd,
     PromptStart,
-    PromptText(String)
+    PromptText(String),
+    SemiColon
 }
 
 

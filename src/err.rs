@@ -1,13 +1,12 @@
-use crate::args;
-use crate::ast;
+use crate::{args, ast};
+use crate::ast::AstErr;
 use crate::file_manager;
-
 
 
 pub enum AppErr {
     FileManager(file_manager::FileManagerErr),
     Args(args::ArgsErr),
-    Ast(ast::AstErr),
+    Ast(AstErr),
 }
 
 

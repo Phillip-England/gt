@@ -7,7 +7,7 @@ pub struct GenericLex<T> {
     pub marked_pos: usize,
 }
 
-impl<T> GenericLex<T> {
+impl<T: Clone> GenericLex<T> {
 
     pub fn new(items: Vec<T>) -> GenericLex<T> {
         let vec_len: usize = items.len();
@@ -27,17 +27,26 @@ impl<T> GenericLex<T> {
         }
     }
 
+    pub fn next_by(&mut self, by: usize) {
+        let ends_at: usize = self.pos + by;
+        if ends_at < self.len {
+            self.pos = ends_at;
+            return;
+        }
+        self.pos = self.len;
+    }
+
     pub fn prev(&mut self) {
         if self.pos > 0 {
             self.pos = self.pos - 1
         }
     }
 
-    pub fn item(&self) -> &T {
-        return &self.items[self.pos];
+    pub fn item(&self) -> T {
+        return self.items[self.pos].clone();
     }
 
-    pub fn peek(&mut self, by: i32) -> &T {
+    pub fn peek(&mut self, by: i32) -> T {
         let current_pos = self.pos;
         let mut count = 0;
 
@@ -54,7 +63,7 @@ impl<T> GenericLex<T> {
         }
         let target_pos = self.pos.clone();
         self.pos = current_pos;
-        return &self.items[target_pos];
+        return self.items[target_pos].clone();
 
     }
 
@@ -81,7 +90,6 @@ impl<T> GenericLex<T> {
         self.next();
         loop {
             if matches!(self.item(), _stop_at) {
-                println!("hit");
                 return true;
             }
             if self.at_end() {
@@ -98,12 +106,18 @@ impl<T> GenericLex<T> {
     pub fn go_to_mark(&mut self) {
         self.pos = self.marked_pos;
     }
+    
+    pub fn marked_pos(&self) -> usize {
+        return self.marked_pos.clone();
+    }
 
-    pub fn collect(&mut self, mut start_index: usize, end_index: usize) -> Vec<&T> {
+    pub fn collect(&mut self, mut start_index: usize, end_index: usize) -> Vec<T> {
         if start_index > self.len {
             start_index = self.len;
         }
-        let col = &self.items[start_index..end_index];
+        let col = self.items[start_index..end_index].iter().map(|c| {
+            (*c).clone()
+        });
         let mut vec = vec![];
         for c in col {
             vec.push(c);
