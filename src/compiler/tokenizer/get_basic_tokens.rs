@@ -1,4 +1,4 @@
-use crate::{err::AppErr, lexer::GenericLex, tokenizer::{BasicToken, BasicTokenState}};
+use crate::{err::AppErr, compiler::lexer::Lexer, compiler::tokenizer::{BasicToken, BasicTokenState}};
 
 
 
@@ -8,7 +8,7 @@ use crate::{err::AppErr, lexer::GenericLex, tokenizer::{BasicToken, BasicTokenSt
 pub fn get_basic_tokens(content: String) -> Result<Vec<BasicToken>, AppErr> {
     let chars: Vec<char> = content.chars().collect();
     let mut toks: Vec<BasicToken> = vec![];
-    let mut l: GenericLex<char> = GenericLex::new(chars);
+    let mut l: Lexer<char> = Lexer::new(chars);
     let mut state = BasicTokenState::Init;
     loop {
         match state {

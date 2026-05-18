@@ -1,4 +1,5 @@
-use crate::{ast::{AstErr, DataType}, err::AppErr, lexer::GenericLex, tokenizer::AdvancedToken};
+use crate::{compiler::ast::{AstErr, DataType}, err::AppErr, compiler::lexer::Lexer, compiler::tokenizer::AdvancedToken};
+
 
 
 
@@ -17,7 +18,7 @@ impl NodeVariable {
         let toks_clone = toks.iter().map(|t| {
             return t.clone();
         }).collect();
-        let mut l: GenericLex<AdvancedToken> = GenericLex::new(toks_clone);
+        let mut l: Lexer<AdvancedToken> = Lexer::new(toks_clone);
         let var_data_type: DataType;
         let var_name: String;
         let tok1 = l.peek(1);

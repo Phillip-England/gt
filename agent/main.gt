@@ -9,8 +9,8 @@ data Plan {
 };
 
 
-let response: Plan = <? 
+let plan: Plan = <? 
     Please take the users prompt and construct a plan
-?>;
+?>; 
 
 

@@ -1,6 +1,6 @@
-pub mod run;
-pub mod help;
-pub mod primary_cmd;
+mod run;
+mod help;
+mod primary_cmd;
 
 pub use run::*;
 pub use help::*;

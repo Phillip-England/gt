@@ -1,4 +1,5 @@
-use crate::{ast::{AstErr, AstNode, NodeDataType, NodeVariable}, err::AppErr, lexer::GenericLex, tokenizer::AdvancedToken};
+use crate::{compiler::ast::{AstErr, AstNode, NodeDataType, NodeVariable}, err::AppErr, compiler::lexer::Lexer, compiler::tokenizer::AdvancedToken};
+
 
 
 
@@ -17,7 +18,7 @@ pub fn new_ast(toks: Vec<AdvancedToken>) -> Result<Ast, AppErr> {
     };
 
 
-    let mut l: GenericLex<AdvancedToken> = GenericLex::new(toks);
+    let mut l: Lexer<AdvancedToken> = Lexer::new(toks);
     loop {
         let tok = l.item();
         match tok {

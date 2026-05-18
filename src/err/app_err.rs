@@ -1,6 +1,6 @@
-use crate::args::ArgsErr;
-use crate::{args, ast};
-use crate::ast::AstErr;
+use crate::cli::args::ArgsErr;
+use crate::compiler::ast::{self, AstErr};
+use crate::cli::{args};
 use crate::file_manager::{self, FileManagerErr};
 
 #[derive(Debug)]

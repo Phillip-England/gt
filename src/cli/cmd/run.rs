@@ -1,4 +1,4 @@
-use crate::{ast::new_ast, err::AppErr, file_manager::{read_to_string}, tokenizer::{tokenize}};
+use crate::{compiler::ast::new_ast, err::AppErr, file_manager::{read_to_string}, compiler::tokenizer::{tokenize}};
 
 enum State {
     Init,

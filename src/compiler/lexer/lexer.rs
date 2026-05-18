@@ -1,17 +1,17 @@
 
 #[derive(Debug, Clone)]
-pub struct GenericLex<T> {
+pub struct Lexer<T> {
     items: Vec<T>,
     pub pos: usize,
     len: usize,
     pub marked_pos: usize,
 }
 
-impl<T: Clone> GenericLex<T> {
+impl<T: Clone> Lexer<T> {
 
-    pub fn new(items: Vec<T>) -> GenericLex<T> {
+    pub fn new(items: Vec<T>) -> Lexer<T> {
         let vec_len: usize = items.len();
-        let l: GenericLex<T> = GenericLex {
+        let l: Lexer<T> = Lexer {
             items: items,
             pos: 0,
             len: vec_len-1,

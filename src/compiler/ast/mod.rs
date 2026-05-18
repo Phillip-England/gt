@@ -1,10 +1,10 @@
-pub mod ast;
-pub mod ast_err;
-pub mod ast_node;
-pub mod node_data_field;
-pub mod node_data_type;
-pub mod data_type;
-pub mod node_variable;
+mod ast;
+mod ast_err;
+mod ast_node;
+mod node_data_field;
+mod node_data_type;
+mod data_type;
+mod node_variable;
 
 pub use ast::*;
 pub use ast_err::*;
