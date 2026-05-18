@@ -2,7 +2,7 @@ use crate::{args, ast};
 use crate::ast::AstErr;
 use crate::file_manager;
 
-
+#[derive(Debug)]
 pub enum AppErr {
     FileManager(file_manager::FileManagerErr),
     Args(args::ArgsErr),

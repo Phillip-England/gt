@@ -1,5 +1,6 @@
 
 
+#[derive(Debug)]
 pub enum AstErr {
     MissingOpeningCurlyBrace(String),
     ExpectedIndicatorToken(String),
