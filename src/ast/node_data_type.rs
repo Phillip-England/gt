@@ -49,7 +49,7 @@ impl NodeDataType {
                     count = count + 1;
                     continue
                 }
-                // even should be field type
+                // even should be field data type
                 if matches!(tok, Token::KeywordNum) {
                     field_types.push(DataType::Num)
                 }
@@ -58,6 +58,9 @@ impl NodeDataType {
                 }
                 if matches!(tok, Token::KeywordBool) {
                     field_types.push(DataType::Bool)
+                }
+                if matches!(tok, Token::Indicator(_)) {
+                    field_types.push(DataType::Custom);
                 }
 
             }
@@ -77,7 +80,6 @@ impl NodeDataType {
             }
             let name_opt = field_names.get(count);
             if name_opt.is_none() {
-                println!("{:?}", fields);
                 return Err(AppErr::Ast(AstErr::MalformedDataType(String::from("could not find field name in expected location"))))
             }
             let name = name_opt.unwrap();

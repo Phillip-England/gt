@@ -24,6 +24,7 @@ pub fn run(filepath: String) -> Result<(), err::AppErr> {
     };
 
     let toks = tokenize(content)?;
+    // println!("{:?}", toks);
     let ast = new_ast(toks)?;
     println!("{:?}", ast);
     Ok(())

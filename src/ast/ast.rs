@@ -10,6 +10,7 @@ pub struct Ast {
 }
 
 pub fn new_ast(toks: Vec<Token>) -> Result<Ast, AppErr> {
+    // println!("{:?}", toks);
     
     let mut ast: Ast = Ast {
         head_nodes: vec![],
@@ -74,7 +75,7 @@ pub fn new_ast(toks: Vec<Token>) -> Result<Ast, AppErr> {
                 let node_data_type_toks = l.collect(l.marked_pos(), l.pos());
                 let node_data_type = NodeDataType::new(node_data_type_toks)?;
                 ast.head_nodes.push(AstNode::DataType(node_data_type));
-                
+                l.prev();
             },
             Token::KeywordNum => {
 
