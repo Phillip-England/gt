@@ -1,4 +1,4 @@
-use crate::{cli::args::ArgsErr, err::AppErr};
+use crate::{app_err, cli::args::ArgsErr, err::{AppErr, AppErrKind}};
 
 
 
@@ -11,7 +11,7 @@ pub fn get_arg(args: Vec<String>, pos: usize) -> Result<(Vec<String>, String), A
             final_arg = arg.to_string();
         },
         None => {
-          return Err(AppErr::Args(ArgsErr::ArgDoesNotExist(pos))); 
+          return Err(app_err!(AppErrKind::Args(ArgsErr::ArgDoesNotExist(pos)))); 
         }
     }
     return Ok((args, final_arg))

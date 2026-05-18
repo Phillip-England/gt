@@ -1,4 +1,4 @@
-use crate::{compiler::ast::{AstErr, AstNode, NodeDataType, NodeVariable}, err::AppErr, compiler::lexer::Lexer, compiler::tokenizer::AdvancedToken};
+use crate::{app_err, compiler::{ast::{AstErr, AstNode, NodeDataType, NodeVariable}, lexer::Lexer, tokenizer::AdvancedToken}, err::{AppErr, AppErrKind}};
 
 
 
@@ -41,7 +41,7 @@ pub fn new_ast(toks: Vec<AdvancedToken>) -> Result<Ast, AppErr> {
                         break;
                     }
                     if l.at_end() {
-                        return Err(AppErr::Ast(AstErr::MissingSemiColon(String::from("could not locate a semicolon for 'let' token"))));   
+                        return Err(app_err!(AppErrKind::Ast(AstErr::MissingSemiColon(String::from("could not locate a semicolon for 'let' token")))));   
                     }
                     l.next();
                 }
@@ -60,7 +60,7 @@ pub fn new_ast(toks: Vec<AdvancedToken>) -> Result<Ast, AppErr> {
                     }
                 }
                 if !is_data_keyword {
-                    return Err(AppErr::Ast(AstErr::MissingOpeningCurlyBrace(String::from("expected to find opening curly brace after data keyword but failed to find it")))) 
+                    return Err(app_err!(AppErrKind::Ast(AstErr::MissingOpeningCurlyBrace(String::from("expected to find opening curly brace after data keyword but failed to find it"))))) 
                 }
                 l.mark();
                 loop {
@@ -68,7 +68,7 @@ pub fn new_ast(toks: Vec<AdvancedToken>) -> Result<Ast, AppErr> {
                         break;
                     }
                     if l.at_end() {
-                        return Err(AppErr::Ast(AstErr::MissingSemiColon(String::from("expected to find a closing curly brace for our data keyword but failed to find it")))) 
+                        return Err(app_err!(AppErrKind::Ast(AstErr::MissingSemiColon(String::from("expected to find a closing curly brace for our data keyword but failed to find it"))))) 
                     }
                     l.next();
                 }
