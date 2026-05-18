@@ -1,4 +1,4 @@
-use crate::{ast::{AstErr, NodeDataField, DataType}, err::AppErr, tokenizer::Token};
+use crate::{ast::{AstErr, NodeDataField, DataType}, err::AppErr, tokenizer::AdvancedToken};
 
 
 
@@ -10,7 +10,7 @@ pub struct NodeDataType {
 
 impl NodeDataType {
 
-    pub fn new(toks: Vec<Token>) -> Result<NodeDataType, AppErr> {
+    pub fn new(toks: Vec<AdvancedToken>) -> Result<NodeDataType, AppErr> {
        
         // extracting data type name
         let second_tok_opt = toks.get(1).clone();
@@ -19,7 +19,7 @@ impl NodeDataType {
         }
         let second_tok = second_tok_opt.unwrap();
         let data_type_name: String;
-        if let Token::Indicator(s) = second_tok {
+        if let AdvancedToken::Indicator(s) = second_tok {
             data_type_name = s.clone();
         } else {
             return Err(AppErr::Ast(AstErr::ExpectedIndicatorToken(String::from("attempted to access tokens for ast generation, and expected an indicator token, but could not find one"))))   
@@ -31,35 +31,35 @@ impl NodeDataType {
         let mut field_types: Vec<DataType> = vec![];
         for tok in toks {
             if count > 2 {
-                if matches!(tok, Token::ClosedCurlyBrace) {
+                if matches!(tok, AdvancedToken::ClosedCurlyBrace) {
                     count = count + 1;
                     continue
                 }
                 // odd should be field name
                 if count % 2 == 1 {
-                    if matches!(tok, Token::Indicator(_)) {
+                    if matches!(tok, AdvancedToken::Indicator(_)) {
                         match tok {
-                            Token::Indicator(s) => {
+                            AdvancedToken::Indicator(s) => {
                                 let field_name = s.to_owned();
                                 field_names.push(field_name);
                             },
-                            (_) => {}
+                            _ => {}
                         }
                     }
                     count = count + 1;
                     continue
                 }
                 // even should be field data type
-                if matches!(tok, Token::KeywordNum) {
+                if matches!(tok, AdvancedToken::KeywordNum) {
                     field_types.push(DataType::Num)
                 }
-                if matches!(tok, Token::KeywordStr) {
+                if matches!(tok, AdvancedToken::KeywordStr) {
                     field_types.push(DataType::Str)
                 }
-                if matches!(tok, Token::KeywordBool) {
+                if matches!(tok, AdvancedToken::KeywordBool) {
                     field_types.push(DataType::Bool)
                 }
-                if matches!(tok, Token::Indicator(_)) {
+                if matches!(tok, AdvancedToken::Indicator(_)) {
                     field_types.push(DataType::Custom);
                 }
 

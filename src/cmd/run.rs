@@ -1,4 +1,4 @@
-use crate::{ast::new_ast, err::AppErr, file_manager::{self, read_to_string}, lexer::GenericLex, tokenizer::{LexerToken, Token, tokenize}};
+use crate::{ast::new_ast, err::AppErr, file_manager::{read_to_string}, tokenizer::{tokenize}};
 
 enum State {
     Init,

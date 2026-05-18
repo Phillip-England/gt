@@ -1,11 +1,11 @@
-use crate::{ast::{AstErr, DataType}, err::AppErr, lexer::GenericLex, tokenizer::Token};
+use crate::{ast::{AstErr, DataType}, err::AppErr, lexer::GenericLex, tokenizer::AdvancedToken};
 
 
 
 
 #[derive(Clone, Debug)]
 pub struct NodeVariable {
-    toks: Vec<Token>,
+    toks: Vec<AdvancedToken>,
     t: DataType,
     name: String,
 }
@@ -13,16 +13,16 @@ pub struct NodeVariable {
 impl NodeVariable {
 
 
-    pub fn new(toks: Vec<Token>) -> Result<NodeVariable, AppErr> {
+    pub fn new(toks: Vec<AdvancedToken>) -> Result<NodeVariable, AppErr> {
         let toks_clone = toks.iter().map(|t| {
             return t.clone();
         }).collect();
-        let mut l: GenericLex<Token> = GenericLex::new(toks_clone);
+        let mut l: GenericLex<AdvancedToken> = GenericLex::new(toks_clone);
         let var_data_type: DataType;
         let var_name: String;
         let tok1 = l.peek(1);
         match tok1 {
-            Token::VariableName(name) => {
+            AdvancedToken::VariableName(name) => {
                 var_name = name.clone();
             },
             _ => {
@@ -30,21 +30,21 @@ impl NodeVariable {
             }
         }
         let tok2 = l.peek(2);
-        if !matches!(tok2, Token::Colon) {
+        if !matches!(tok2, AdvancedToken::Colon) {
             return Err(AppErr::Ast(AstErr::MalformedVariable(String::from("expected 2nd token from 'let' keyword to be of type Colon"))));
         }
         let tok3 = l.peek(3);
         match tok3 {
-            Token::Indicator(_) => {
+            AdvancedToken::Indicator(_) => {
                 var_data_type = DataType::Custom;
             },
-            Token::KeywordBool => {
+            AdvancedToken::KeywordBool => {
                 var_data_type = DataType::Bool;
             },
-            Token::KeywordNum => {
+            AdvancedToken::KeywordNum => {
                 var_data_type = DataType::Num;
             },
-            Token::KeywordStr => {
+            AdvancedToken::KeywordStr => {
                 var_data_type = DataType::Str;
             }
             _ => {
@@ -52,7 +52,7 @@ impl NodeVariable {
             }
         }
         let tok4 = l.peek(4);
-        if !matches!(tok4, Token::OperatorAssignment) {
+        if !matches!(tok4, AdvancedToken::OperatorAssignment) {
             return Err(AppErr::Ast(AstErr::MalformedVariable(String::from("expected 4th token from 'let' keyword to be of type OperatorAssignment"))))
         }
         // have to find end of variable
@@ -60,7 +60,7 @@ impl NodeVariable {
         l.next_by(5);
         loop {
             let tok = l.item();
-            if matches!(tok, Token::SemiColon) {
+            if matches!(tok, AdvancedToken::SemiColon) {
                 break;
             }
             if l.at_end() {

@@ -1,4 +1,4 @@
-use crate::{ast::{NodeDataType, NodeVariable}, tokenizer::Token};
+use crate::{ast::{NodeDataType, NodeVariable}, tokenizer::AdvancedToken};
 
 
 
@@ -12,6 +12,6 @@ pub enum AstNode {
 }
 
 
-pub fn new_ast_node(tok: Token) -> Result<(), ()> {
+pub fn new_ast_node(_: AdvancedToken) -> Result<(), ()> {
     return Ok(())
 }

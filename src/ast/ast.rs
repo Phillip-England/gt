@@ -1,4 +1,4 @@
-use crate::{ast::{AstErr, AstNode, DataType, NodeDataField, NodeDataType, NodeVariable}, err::AppErr, lexer::GenericLex, tokenizer::Token};
+use crate::{ast::{AstErr, AstNode, NodeDataType, NodeVariable}, err::AppErr, lexer::GenericLex, tokenizer::AdvancedToken};
 
 
 
@@ -9,7 +9,7 @@ pub struct Ast {
     head_nodes: Vec<AstNode> 
 }
 
-pub fn new_ast(toks: Vec<Token>) -> Result<Ast, AppErr> {
+pub fn new_ast(toks: Vec<AdvancedToken>) -> Result<Ast, AppErr> {
     // println!("{:?}", toks);
     
     let mut ast: Ast = Ast {
@@ -17,26 +17,26 @@ pub fn new_ast(toks: Vec<Token>) -> Result<Ast, AppErr> {
     };
 
 
-    let mut l: GenericLex<Token> = GenericLex::new(toks);
+    let mut l: GenericLex<AdvancedToken> = GenericLex::new(toks);
     loop {
         let tok = l.item();
         match tok {
-            Token::Colon => {
+            AdvancedToken::Colon => {
 
             },
-            Token::SemiColon => {
+            AdvancedToken::SemiColon => {
 
             },
-            Token::Indicator(s) => {
+            AdvancedToken::Indicator(s) => {
 
             },
-            Token::EndOfFile => {
+            AdvancedToken::EndOfFile => {
 
             },
-            Token::KeywordLet => {
+            AdvancedToken::KeywordLet => {
                 l.mark();
                 loop {
-                    if matches!(l.item(), Token::SemiColon) {
+                    if matches!(l.item(), AdvancedToken::SemiColon) {
                         break;
                     }
                     if l.at_end() {
@@ -49,11 +49,11 @@ pub fn new_ast(toks: Vec<Token>) -> Result<Ast, AppErr> {
                 let node_var = NodeVariable::new(node_var_toks)?;
                 ast.head_nodes.push(AstNode::Variable(node_var));
             },
-            Token::KeywordData => {
+            AdvancedToken::KeywordData => {
                 let mut is_data_keyword = false;
-                if matches!(l.peek(1), Token::Indicator(s)) {
-                    if matches!(l.peek(2), Token::OpenedCurlyBrace) {
-                        if matches!(l.peek(3), Token::Indicator(s2)) {
+                if matches!(l.peek(1), AdvancedToken::Indicator(s)) {
+                    if matches!(l.peek(2), AdvancedToken::OpenedCurlyBrace) {
+                        if matches!(l.peek(3), AdvancedToken::Indicator(s2)) {
                             is_data_keyword = true;
                         }
                     }
@@ -63,7 +63,7 @@ pub fn new_ast(toks: Vec<Token>) -> Result<Ast, AppErr> {
                 }
                 l.mark();
                 loop {
-                    if matches!(l.item(), Token::SemiColon) {
+                    if matches!(l.item(), AdvancedToken::SemiColon) {
                         break;
                     }
                     if l.at_end() {
@@ -77,34 +77,34 @@ pub fn new_ast(toks: Vec<Token>) -> Result<Ast, AppErr> {
                 ast.head_nodes.push(AstNode::DataType(node_data_type));
                 l.prev();
             },
-            Token::KeywordNum => {
+            AdvancedToken::KeywordNum => {
 
             },
-            Token::KeywordStr => {
+            AdvancedToken::KeywordStr => {
 
             },
-            Token::KeywordBool => {
+            AdvancedToken::KeywordBool => {
 
             },
-            Token::OperatorAssignment => {
+            AdvancedToken::OperatorAssignment => {
 
             },
-            Token::PromptEnd => {
+            AdvancedToken::PromptEnd => {
 
             },
-            Token::VariableName(_) => {
+            AdvancedToken::VariableName(_) => {
 
             },
-            Token::PromptStart => {
+            AdvancedToken::PromptStart => {
 
             },
-            Token::PromptText(_) => {
+            AdvancedToken::PromptText(_) => {
 
             },
-            Token::ClosedCurlyBrace => {
+            AdvancedToken::ClosedCurlyBrace => {
 
             },
-            Token::OpenedCurlyBrace => {
+            AdvancedToken::OpenedCurlyBrace => {
 
             }
 
