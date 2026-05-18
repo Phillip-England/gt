@@ -1,6 +1,5 @@
-use rlex::Rlex;
 
-use crate::{err};
+use crate::{err, lexer::GenericLex};
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Token {
@@ -95,69 +94,89 @@ pub fn refine_tokens(toks: Vec<LexerToken>) -> Result<Vec<Token>, err::AppErr> {
 }
 
 pub fn derive_basic_tokens(content: String) -> Result<Vec<LexerToken>, err::AppErr> {
-    let mut r: Rlex<LexerState, LexerToken> = Rlex::new(&content, LexerState::Init);
-    
+    let chars: Vec<char> = content.chars().collect();
+    let mut toks: Vec<LexerToken> = vec![];
+    let mut l: GenericLex<char> = GenericLex::new(chars);
+    let mut state = State::Init;
     loop {
-        if r.at_end() {
-            break;
-        }
-        match r.state() {
-            &LexerState::Init => {
-                if r.char() == ' ' || r.char() == '\n' {
-                    r.next();
-                    continue;
-                }
-                r.state_set(LexerState::AtWordStart);
-            },
-            &LexerState::AtWordStart => {
-                if r.char() == ' ' || r.char() == '\n' {
-                    r.state_set(LexerState::Init);
-                    continue;
-                }
-                loop {
-                    if r.at_end() || r.char() == ' ' || r.char() == '\n' {
+        match state {
+
+            State::Init => {
+                if l.item() == ' ' || l.item() == '\n' {
+                    l.next();
+                    if l.at_end() {
                         break;
                     }
-                    r.collect();
-                    r.next();
+                    continue;
                 }
-                let col = r.str_from_collection().to_string();
-                r.collect_clear();
+                state = State::AtWordStart;
+            },
 
-                if col == "<?" {
-                    r.token_push(LexerToken::PromptStart);
-                    r.mark();
+            State::AtWordStart => {
+                if l.item() == ' ' || l.item() == '\n' {
+                    state = State::Init;
+                    continue;
+                }
+                l.mark();
+                loop {
+                    if l.item() == ' ' || l.item() == '\n' || l.at_end() {
+                        break;
+                    }
+                    l.next();
+                }
+                let word: String = l.collect(l.marked_pos(), l.pos()).into_iter().collect();
+
+                if word == "<?" {
+                    toks.push(LexerToken::PromptStart);
+                    l.mark();
                     loop {
-                        if r.at_end() {
-                            break;
-                        }
-                        r.next_until('>');
-                        if r.peek_back() != '?' || r.peek() != ';' {
+
+                        if l.item() != '>' {
+                            l.next();
+                            if l.at_end() {
+                                break;
+                            }
                             continue;
                         }
-                        let mut prompt_str = r.str_from_mark().to_string();
+                        if l.at_end() {
+                            break;
+                        }
+                        if l.peek(-1) != '?' || l.peek(1) != ';' {
+                            l.next();
+                            if l.at_end() {
+                                break;
+                            }
+                            continue;
+                        }
+                        let mut prompt_str: String = l.collect(l.marked_pos(), l.pos()).into_iter().collect();
                         prompt_str.pop();
                         prompt_str.pop();
-                        r.token_push(LexerToken::PromptText(prompt_str.trim().to_string()));
-                        r.token_push(LexerToken::PromptEnd);
-                        r.token_push(LexerToken::SemiColon);
-                        r.next();
-                        r.next();
+                        toks.push(LexerToken::PromptText(prompt_str.trim().to_string()));
+                        toks.push(LexerToken::PromptEnd);
+                        toks.push(LexerToken::SemiColon);
+                        l.next();
+                        l.next();
                         break;
                     }
                     continue;
                 }
 
-                r.token_push(LexerToken::Indicator(col));
+                toks.push(LexerToken::Indicator(word));
 
-            } 
-        }
+                l.next();
+                if l.at_end() {
+                    break;
+                }
 
+            }
+
+
+        } 
+        
     }
 
 
-    let toks = r.toks().clone();
-    println!("{:?}", toks);
+
     return Ok(toks)   
 }
 
@@ -165,6 +184,7 @@ pub fn derive_basic_tokens(content: String) -> Result<Vec<LexerToken>, err::AppE
 
 pub fn tokenize(s: String) -> Result<Vec<Token>, err::AppErr> {
     let basic_tokens = derive_basic_tokens(s)?;
+    println!("{:?}", basic_tokens);
     let refined_tokens = refine_tokens(basic_tokens)?;
     return Ok(refined_tokens);
 }
@@ -181,7 +201,7 @@ pub enum LexerToken {
 
 
 #[derive(Debug, PartialEq, Eq)]
-pub enum LexerState {
+enum State {
     Init,
-    AtWordStart
+    AtWordStart,
 }

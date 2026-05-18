@@ -2,6 +2,3 @@
 name = "gt"
 version = "0.1.0"
 edition = "2024"
-
-[dependencies]
-rlex = "0.1.15"
