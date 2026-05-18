@@ -92,13 +92,13 @@ pub fn new_ast(toks: Vec<Token>) -> Result<Ast, AppErr> {
             Token::PromptEnd => {
 
             },
-            Token::VariableName(s) => {
+            Token::VariableName(_) => {
 
             },
             Token::PromptStart => {
 
             },
-            Token::PromptText(s) => {
+            Token::PromptText(_) => {
 
             },
             Token::ClosedCurlyBrace => {

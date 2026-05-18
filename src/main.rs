@@ -1,4 +1,4 @@
-use crate::{cmd::{PrimaryCmd, primary_cmd_as_str}, err::AppErr}; 
+use crate::{cmd::{PrimaryCmd, primary_cmd_as_str}, err::{AppErr, handle_app_err}}; 
 
 // dir-level
 mod ast;
@@ -11,7 +11,16 @@ mod args;
 mod cmd;
 mod file_manager;
 
-fn main() -> Result<(), AppErr> {
+fn main() {
+    match run() {
+        Err(err) => {
+            handle_app_err(err);
+            std::process::exit(1);
+        }
+        _ => {}
+    }
+}
+fn run() -> Result<(), AppErr> {
 
     let args = args::load_args()?; 
     let (args, first_arg) = args::get_arg(args, 1)?; 
@@ -31,3 +40,4 @@ fn main() -> Result<(), AppErr> {
 
     return Ok(())
 }
+

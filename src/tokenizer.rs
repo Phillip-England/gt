@@ -157,7 +157,7 @@ pub fn derive_basic_tokens(content: String) -> Result<Vec<LexerToken>, err::AppE
 
 
     let toks = r.toks().clone();
-
+    println!("{:?}", toks);
     return Ok(toks)   
 }
 
