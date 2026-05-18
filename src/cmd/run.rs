@@ -1,17 +1,7 @@
+use crate::{ast::new_ast, err::AppErr, file_manager, tokenizer::tokenize};
 
 
-
-use crate::{ast::{new_ast}, err, file_manager, tokenizer::{tokenize}};
-
-
-
-pub fn help() {
-    println!("gt - a agent-first scripting runtime
-gt help
-gt run <file-path>");
-}
-
-pub fn run(filepath: String) -> Result<(), err::AppErr> {
+pub fn run(filepath: String) -> Result<(), AppErr> {
     
     let content: String;
     match file_manager::read_file(filepath) {
@@ -19,7 +9,7 @@ pub fn run(filepath: String) -> Result<(), err::AppErr> {
             content = source_content;
         },
         Err(err) => {
-            return Err(err::AppErr::FileManager(err));
+            return Err(AppErr::FileManager(err));
         }
     };
 
@@ -29,7 +19,3 @@ pub fn run(filepath: String) -> Result<(), err::AppErr> {
     println!("{:?}", ast);
     Ok(())
 }
-
-
-
-

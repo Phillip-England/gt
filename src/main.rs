@@ -1,7 +1,10 @@
 use crate::err::{AppErr}; 
 
-mod err;
+// dir-level
 mod ast;
+
+// file-level
+mod err;
 mod tokenizer;
 mod lexer;
 mod args;
