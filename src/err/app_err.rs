@@ -1,5 +1,5 @@
 use crate::cli::args::ArgsErr;
-use crate::compiler::ast::{self, AstErr};
+use crate::compiler::parser::{self, ParserErr};
 use crate::cli::{args};
 use crate::file_manager::{self, FileManagerErr};
 
@@ -10,7 +10,7 @@ use crate::file_manager::{self, FileManagerErr};
 pub enum AppErrKind {
     FileManager(FileManagerErr),
     Args(ArgsErr),
-    Ast(AstErr),
+    Ast(ParserErr),
 }
 
 
@@ -35,6 +35,7 @@ macro_rules! app_err {
 
 
 pub fn handle_app_err(app_err: AppErr) {
+    eprintln!("ERROR: {:?}\nfile: {:?}\nline: {:?}", app_err.kind, app_err.file, app_err.line);
     match app_err.kind {
         AppErrKind::FileManager(compiler_err) => {
             file_manager::handle_file_manager_err(compiler_err);
@@ -43,7 +44,7 @@ pub fn handle_app_err(app_err: AppErr) {
             args::handle_arg_err(args_err);
         },
         AppErrKind::Ast(ast_err) => {
-            ast::handle_ast_err(ast_err);    
+            parser::handle_ast_err(ast_err);    
         }
     };
 }

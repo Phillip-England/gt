@@ -1,10 +1,10 @@
 
-data PlanItem {
+struct PlanItem {
     name str
     content str
 };
 
-data Plan {
+struct Plan {
     items PlanItem[]
 };
 

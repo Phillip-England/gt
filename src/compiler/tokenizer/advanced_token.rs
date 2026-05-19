@@ -4,7 +4,7 @@
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum AdvancedToken {
-    KeywordData,
+    KeywordStruct,
     KeywordLet,
     KeywordStr,
     KeywordNum,

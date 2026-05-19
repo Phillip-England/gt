@@ -11,8 +11,8 @@ pub fn get_advanced_tokens(toks: Vec<BasicToken>) -> Result<Vec<AdvancedToken>, 
     for tok in toks {
         match tok {
             BasicToken::Indicator(mut s) => {
-                if s == "data" {
-                    sorted.push(AdvancedToken::KeywordData);
+                if s == "struct" {
+                    sorted.push(AdvancedToken::KeywordStruct);
                     continue;
                 }
                 if s == "str" {

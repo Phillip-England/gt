@@ -1,7 +1,7 @@
 
 
 #[derive(Debug)]
-pub enum AstErr {
+pub enum ParserErr {
     MissingOpeningCurlyBrace(String),
     ExpectedIndicatorToken(String),
     MalformedDataType(String),
@@ -10,21 +10,21 @@ pub enum AstErr {
 }
 
 
-pub fn handle_ast_err(err: AstErr) {
+pub fn handle_ast_err(err: ParserErr) {
     match err {
-        AstErr::MissingSemiColon(s) => {
+        ParserErr::MissingSemiColon(s) => {
             eprintln!("missing semicolon: {}", s);
         },
-        AstErr::MissingOpeningCurlyBrace(s) => {
+        ParserErr::MissingOpeningCurlyBrace(s) => {
             eprintln!("missing opening curly brace: {}", s);
         },
-        AstErr::ExpectedIndicatorToken(s) => {
+        ParserErr::ExpectedIndicatorToken(s) => {
             eprintln!("expected indicator token but did not find one: {}", s);
         },
-        AstErr::MalformedDataType(s) => {
+        ParserErr::MalformedDataType(s) => {
             eprintln!("unexpected data type structure encountered: {}", s);
         },
-        AstErr::MalformedVariable(s) => {
+        ParserErr::MalformedVariable(s) => {
             eprintln!("AST ERR: malformed variable: {}", s);
         }
     }
