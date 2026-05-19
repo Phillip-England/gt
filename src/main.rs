@@ -3,7 +3,8 @@ use crate::{cli::cmd::{PrimaryCmd, primary_cmd_as_str}, err::{AppErr, handle_app
 mod compiler;
 mod cli;
 mod err;
-mod file_manager;
+mod io;
+mod interpreter;
 
 fn main() {
     match run() {

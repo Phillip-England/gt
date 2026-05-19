@@ -1,17 +1,10 @@
 use crate::{compiler::{lexer::Lexer, node::{Node}, parser::{parse_data_struct, parse_variable}, tokenizer::AdvancedToken}, err::{AppErr}};
 
 
-
-
-
-
 #[derive(Debug, Clone)]
 pub struct Ast {
-    head_nodes: Vec<Node> 
+    pub head_nodes: Vec<Node> 
 }
-
-
-
 
 pub fn parse_ast(toks: Vec<AdvancedToken>) -> Result<Ast, AppErr> {
     // println!("{:?}", toks);

@@ -6,9 +6,9 @@ use crate::{app_err, compiler::{parser::{ParserErr, DataType}, lexer::Lexer, tok
 
 #[derive(Clone, Debug)]
 pub struct Variable {
-    toks: Vec<AdvancedToken>,
-    t: DataType,
-    name: String,
+    pub toks: Vec<AdvancedToken>,
+    pub t: DataType,
+    pub name: String,
 }
 
 impl Variable {

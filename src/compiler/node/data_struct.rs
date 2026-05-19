@@ -5,8 +5,8 @@ use crate::{app_err, compiler::{node::DataField, parser::{ParserErr, DataType}, 
 
 #[derive(Clone, Debug)]
 pub struct DataStruct {
-	name: String,
-	node_fields: Vec<DataField>
+	pub name: String,
+	pub node_fields: Vec<DataField>
 }
 
 impl DataStruct {
