@@ -3,6 +3,8 @@ use crate::compiler::parser::{self, ParserErr};
 use crate::cli::{args};
 use crate::interpreter::{self, InterpreterErr};
 use crate::io::{self, IoErr};
+use crate::llm;
+use crate::llm::ollama::LlmErr;
 
 
 
@@ -13,6 +15,7 @@ pub enum AppErrKind {
     Args(ArgsErr),
     Parser(ParserErr),
     Interpreter(InterpreterErr),
+    Llm(LlmErr),
 }
 
 
@@ -50,6 +53,9 @@ pub fn handle_app_err(app_err: AppErr) {
         },
         AppErrKind::Interpreter(err) => {
             interpreter::handle_err(err);
+        },
+        AppErrKind::Llm(err) => {
+            llm::handle_err(err);
         }
     };
 }

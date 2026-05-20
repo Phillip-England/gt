@@ -5,6 +5,7 @@ mod cli;
 mod err;
 mod io;
 mod interpreter;
+mod llm;
 
 fn main() {
     match run() {

@@ -1,7 +1,7 @@
 
 use std::collections::HashMap;
 
-use crate::{app_err, compiler::{node::{DataStruct, Node, Variable}, parser::{Ast, DataType}, tokenizer::AdvancedToken}, err::{AppErr, AppErrKind}};
+use crate::{app_err, compiler::{node::{DataStruct, Node, Variable}, parser::{Ast, DataType}, tokenizer::AdvancedToken}, err::{AppErr, AppErrKind}, llm::ollama::{err_if_no_ollama, is_ollama_installed}};
 
 pub fn interpret_ast(ast: Ast) -> Result<(), AppErr> {
 
@@ -56,6 +56,8 @@ pub fn interpret_ast(ast: Ast) -> Result<(), AppErr> {
         }
 
     }).collect(); 
+
+    err_if_no_ollama()?;
 
 
     // doing something with the prompts
