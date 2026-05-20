@@ -36,7 +36,7 @@ pub fn get_basic_tokens(content: String) -> Result<Vec<BasicToken>, AppErr> {
                     }
                     l.next();
                 }
-                let word: String = l.collect(l.marked_pos(), l.pos()).into_iter().collect();
+                let mut word: String = l.collect(l.marked_pos(), l.pos()).into_iter().collect();
 
                 if word == "<?" {
                     toks.push(BasicToken::PromptStart);
@@ -70,6 +70,19 @@ pub fn get_basic_tokens(content: String) -> Result<Vec<BasicToken>, AppErr> {
                         l.next();
                         break;
                     }
+                    continue;
+                }
+
+
+                if word.starts_with("\"") && word.ends_with("\";") {
+                    word.remove(0);
+                    word.pop();
+                    word.pop();
+                    toks.push(BasicToken::DoubleQuote);
+                    toks.push(BasicToken::StrValue(word.clone()));
+                    toks.push(BasicToken::DoubleQuote);
+                    toks.push(BasicToken::SemiColon);
+                    l.next();
                     continue;
                 }
 

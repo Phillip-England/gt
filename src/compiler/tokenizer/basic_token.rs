@@ -8,5 +8,7 @@ pub enum BasicToken {
     PromptEnd,
     PromptStart,
     PromptText(String),
-    SemiColon
+    SemiColon,
+    DoubleQuote,
+    StrValue(String),
 }

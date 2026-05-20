@@ -61,13 +61,19 @@ pub fn get_advanced_tokens(toks: Vec<BasicToken>) -> Result<Vec<AdvancedToken>, 
                 sorted.push(AdvancedToken::PromptEnd);
             },
             BasicToken::PromptText(s) => {
-                sorted.push(AdvancedToken::PromptText(s));
+                sorted.push(AdvancedToken::PromptValue(s));
             },
             BasicToken::PromptStart => {
                 sorted.push(AdvancedToken::PromptStart);
             },
             BasicToken::SemiColon => {
-                sorted.push(AdvancedToken::SemiColon)
+                sorted.push(AdvancedToken::SemiColon);
+            },
+            BasicToken::DoubleQuote => {
+                sorted.push(AdvancedToken::DoubleQuote);
+            }, 
+            BasicToken::StrValue(s) => {
+                sorted.push(AdvancedToken::StrValue(s));
             }
         }
     }

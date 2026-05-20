@@ -11,7 +11,7 @@ use crate::io::{self, IoErr};
 pub enum AppErrKind {
     Io(IoErr),
     Args(ArgsErr),
-    Ast(ParserErr),
+    Parser(ParserErr),
     Interpreter(InterpreterErr),
 }
 
@@ -45,7 +45,7 @@ pub fn handle_app_err(app_err: AppErr) {
         AppErrKind::Args(args_err) => {
             args::handle_arg_err(args_err);
         },
-        AppErrKind::Ast(ast_err) => {
+        AppErrKind::Parser(ast_err) => {
             parser::handle_ast_err(ast_err);    
         },
         AppErrKind::Interpreter(err) => {

@@ -18,7 +18,9 @@ pub enum AdvancedToken {
     Indicator(String),
     PromptStart,
     PromptEnd,
-    PromptText(String),
-    EndOfFile
+    PromptValue(String),
+    EndOfFile,
+    DoubleQuote,
+    StrValue(String),
 
 }

@@ -19,16 +19,16 @@ pub fn parse_ast(toks: Vec<AdvancedToken>) -> Result<Ast, AppErr> {
         let tok = l.item();
         match tok {
             AdvancedToken::Colon => {
-
+                
             },
             AdvancedToken::SemiColon => {
-
+                
             },
             AdvancedToken::Indicator(_) => {
-
+                
             },
             AdvancedToken::EndOfFile => {
-
+                
             },
             AdvancedToken::KeywordLet => {
                 let node_variable = parse_variable(&mut l)?;
@@ -59,13 +59,19 @@ pub fn parse_ast(toks: Vec<AdvancedToken>) -> Result<Ast, AppErr> {
             AdvancedToken::PromptStart => {
 
             },
-            AdvancedToken::PromptText(_) => {
+            AdvancedToken::PromptValue(_) => {
 
             },
             AdvancedToken::ClosedCurlyBrace => {
 
             },
             AdvancedToken::OpenedCurlyBrace => {
+
+            },
+            AdvancedToken::DoubleQuote => {
+
+            },
+            AdvancedToken::StrValue(s) => {
 
             }
 

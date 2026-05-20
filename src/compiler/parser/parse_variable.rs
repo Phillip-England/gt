@@ -7,12 +7,13 @@ pub fn parse_variable(l: &mut Lexer<AdvancedToken>) -> Result<Variable, AppErr> 
             break;
         }
         if l.at_end() {
-            return Err(app_err!(AppErrKind::Ast(ParserErr::MissingSemiColon(String::from("could not locate a semicolon for 'let' token")))));   
+            return Err(app_err!(AppErrKind::Parser(ParserErr::MissingSemiColon(String::from("could not locate a semicolon for 'let' token")))));   
         }
         l.next();
     }
     l.next();
     let node_var_toks = l.collect(l.marked_pos(), l.pos());
     let node_var = Variable::new(node_var_toks)?;
+    l.prev();
     Ok(node_var)
 }

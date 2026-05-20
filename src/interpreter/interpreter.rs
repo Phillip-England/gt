@@ -37,7 +37,7 @@ pub fn interpret_ast(ast: Ast) -> Result<(), AppErr> {
                 let mut prompt_text: String = "".to_string();
                 let prompt_toks: Vec<&AdvancedToken> = variable.toks.iter().filter(|tok| {
                     match tok {
-                        AdvancedToken::PromptText(s) => {
+                        AdvancedToken::PromptValue(s) => {
                             prompt_text = String::from(s);
                             true
                         },
@@ -49,7 +49,6 @@ pub fn interpret_ast(ast: Ast) -> Result<(), AppErr> {
                 if prompt_toks.len() == 0 {
                     return None
                 } else {
-                    println!("{:?}", prompt_text);
                     return Some(variable)
                 }
             },
@@ -59,9 +58,11 @@ pub fn interpret_ast(ast: Ast) -> Result<(), AppErr> {
     }).collect(); 
 
 
+    // doing something with the prompts
+    prompts.iter().for_each(|p| {
+        println!("{}", p.value);
+    });
 
-
-    println!("{:?}", prompts);
     return Ok(())
 }
 

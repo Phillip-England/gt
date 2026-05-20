@@ -8,6 +8,9 @@ struct Plan {
     items PlanItem[]
 };
 
+
+let name: str = "bob";
+
 let plan: Plan = <? 
     Please take the users prompt and construct a plan
 ?>; 
