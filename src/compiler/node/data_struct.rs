@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::{
     app_err,
     compiler::{
@@ -6,6 +8,7 @@ use crate::{
         tokenizer::AdvancedToken,
     },
     err::{AppErr, AppErrKind},
+    interpreter::{InterpreterErr, err_invalid_struct_access},
 };
 
 #[derive(Clone, Debug)]
@@ -15,7 +18,6 @@ pub struct DataStruct {
 }
 
 impl DataStruct {
-
     pub fn new(toks: Vec<AdvancedToken>) -> Result<DataStruct, AppErr> {
         // extracting data type name
         let second_tok_opt = toks.get(1).clone();
@@ -63,18 +65,10 @@ impl DataStruct {
                 }
                 match tok {
                     // even should be data type
-                    AdvancedToken::KeywordNum => {
-                        field_types.push(DataType::Num)
-                    },
-                    AdvancedToken::KeywordStr => {
-                        field_types.push(DataType::Str)
-                    },
-                    AdvancedToken::KeywordBool => {
-                        field_types.push(DataType::Bool)
-                    },
-                    AdvancedToken::Indicator(s) => {
-                        field_types.push(DataType::Custom(s))
-                    },
+                    AdvancedToken::KeywordNum => field_types.push(DataType::Num),
+                    AdvancedToken::KeywordStr => field_types.push(DataType::Str),
+                    AdvancedToken::KeywordBool => field_types.push(DataType::Bool),
+                    AdvancedToken::Indicator(s) => field_types.push(DataType::Custom(s)),
                     _ => {}
                 }
             }
@@ -120,19 +114,27 @@ impl DataStruct {
         });
     }
 
-
-    pub fn get_substruct_names(&self, mut vec: Vec<String>) -> Vec<String> {
+    pub fn get_substruct_names(
+        &self,
+        mut vec: Vec<String>,
+        data_struct_map: &HashMap<String, DataStruct>,
+    ) -> Result<Vec<String>, AppErr> {
         for field in self.node_fields.iter() {
             match &field.data_type {
                 DataType::Str => todo!(),
                 DataType::Num => todo!(),
                 DataType::Bool => todo!(),
-                DataType::Custom(s) => {
-                },
+                DataType::Custom(substruct_name) => {
+                    let inner_struct = match data_struct_map.get(substruct_name) {
+                        Some(data_struct) => data_struct,
+                        None => {
+                            return Err(err_invalid_struct_access(substruct_name.clone()));
+                        }
+                    };
+                }
                 DataType::Array(data_type) => todo!(),
             }
         }
-        return vec![];
+        return Ok(vec![]);
     }
-
 }

@@ -150,5 +150,5 @@ pub struct OllamaResponseChunk {
 pub struct OllamaResponse {
     pub model: String,
     pub text: String,
-    pub chunks: Vec<OllamaResponseChunk>
+    pub chunks: Vec<OllamaResponseChunk>,
 }

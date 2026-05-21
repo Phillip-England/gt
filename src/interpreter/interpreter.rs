@@ -5,7 +5,7 @@ use std::{
 
 use reqwest::blocking::{Client, Response};
 use serde::Deserialize;
-use serde_json::json;
+use serde_json::{error::Category::Data, json};
 
 use crate::{
     app_err,
@@ -33,9 +33,7 @@ pub fn interpret_ast(ast: Ast, model: String) -> Result<(), AppErr> {
                 let key = data_struct.name.clone();
                 let exists = data_struct_map.contains_key(&key);
                 if exists {
-                    return Err(app_err!(AppErrKind::Interpreter(
-                        InterpreterErr::StructDuplication(data_struct)
-                    )));
+                    return Err(err_struct_duplication(data_struct.name));
                 }
                 data_struct_map.insert(data_struct.name.clone(), data_struct);
             }
@@ -43,16 +41,12 @@ pub fn interpret_ast(ast: Ast, model: String) -> Result<(), AppErr> {
                 let key = variable.name.clone();
                 let exists = variable_map.contains_key(&key);
                 if exists {
-                    return Err(app_err!(AppErrKind::Interpreter(
-                        InterpreterErr::VariableDuplication(variable)
-                    )));
+                    return Err(err_variable_duplication(variable.name));
                 }
                 variable_map.insert(variable.name.clone(), variable);
             }
         }
     }
-
-
 
     // extracting our our prompts
     let prompts: Vec<Variable> = variable_map
@@ -84,32 +78,26 @@ pub fn interpret_ast(ast: Ast, model: String) -> Result<(), AppErr> {
     err_if_no_ollama()?;
     let models = get_installed_ollama_models()?;
 
-
     let client = Client::new();
     for p in prompts.into_iter() {
-
         let data_type_struct: &DataStruct = match data_struct_map.get(&p.data_type_str) {
             Some(s) => s,
-            None => { 
-                return Err(app_err!(AppErrKind::Interpreter(InterpreterErr::InvalidVariableType(p))))
-            },
+            None => {
+                return Err(app_err!(AppErrKind::Interpreter(
+                    InterpreterErr::InvalidVariableType(String::from(""))
+                )));
+            }
         };
 
-
-        println!("{:?}", data_type_struct);
-        let substructs = data_type_struct.get_substruct_names(vec![]);
+        let substructs = data_type_struct.get_substruct_names(vec![], &data_struct_map);
         println!("{:?}", substructs);
         // let schema = JsonSchema::new();
         // println!("{:?}", schema);
 
         // for st in data_struct_map.iter() {
 
-
         //     println!("{:?}", st);
         // }
-
-
-
 
         let res = stream_prompt(&client, &model, &p.value)?;
 
@@ -121,72 +109,78 @@ pub fn interpret_ast(ast: Ast, model: String) -> Result<(), AppErr> {
 
 #[derive(Debug)]
 pub struct Interpreter {
-    pub ast: Ast
+    pub ast: Ast,
 }
 
-impl Interpreter {
-
-
-
-}
+impl Interpreter {}
 
 #[derive(Debug)]
 pub enum InterpreterErr {
-    StructDuplication(DataStruct),
-    VariableDuplication(Variable),
-    InvalidVariableType(Variable),
+    StructDuplication(String),
+    VariableDuplication(String),
+    InvalidVariableType(String),
+    InvalidStructAccess(String),
 }
 
 pub fn handle_err(err: InterpreterErr) {
     eprintln!("Interpreter Error:");
     match err {
-        InterpreterErr::InvalidVariableType(variable) => {
-
-        },
-        InterpreterErr::StructDuplication(data_struct) => {
-            eprintln!(
-                "{}",
-                format!(
-                    "The data structure named {} was found multiple times",
-                    data_struct.name
-                )
-            );
-        }
-        InterpreterErr::VariableDuplication(variable) => {
-            eprintln!(
-                "{}",
-                format!(
-                    "The data variable named {} was found declared multiple times",
-                    variable.name
-                )
-            );
-        }
+        InterpreterErr::StructDuplication(s) => eprintln!("{}", s),
+        InterpreterErr::VariableDuplication(s) => eprintln!("{}", s),
+        InterpreterErr::InvalidVariableType(s) => eprintln!("{}", s),
+        InterpreterErr::InvalidStructAccess(s) => eprintln!("{}", s),
     }
 }
 
+pub fn err_invalid_variable_type(variable_name: String) -> AppErr {
+    return app_err!(AppErrKind::Interpreter(
+        InterpreterErr::InvalidVariableType(format!(
+            "The variable named {} has an invalid type",
+            variable_name
+        ))
+    ));
+}
 
+pub fn err_struct_duplication(struct_name: String) -> AppErr {
+    return app_err!(AppErrKind::Interpreter(
+        InterpreterErr::InvalidVariableType(format!(
+            "The struct named {} is duplicated",
+            struct_name
+        ))
+    ));
+}
 
+pub fn err_variable_duplication(variable_name: String) -> AppErr {
+    return app_err!(AppErrKind::Interpreter(
+        InterpreterErr::VariableDuplication(format!(
+            "The variable named {} has been duplicated",
+            variable_name
+        ))
+    ));
+}
 
+pub fn err_invalid_struct_access(struct_name: String) -> AppErr {
+    return app_err!(AppErrKind::Interpreter(InterpreterErr::StructDuplication(
+        format!("The struct named {} has been duplicated", struct_name)
+    )));
+}
 
 const JSON_DEF_CURSOR: &str = "DEF_CURSOR";
 const JSON_CURSOR: &str = "JSON_CURSOR";
 
 #[derive(Debug)]
 pub struct JsonSchema {
-    schema: String
+    schema: String,
 }
 
 impl JsonSchema {
-
     pub fn new() -> JsonSchema {
-        let s = JsonSchema{
+        let s = JsonSchema {
             schema: format!("{{ \"$refs\":{{ {} }}, {} }}", JSON_DEF_CURSOR, JSON_CURSOR),
         };
         s
     }
-
 }
-
 
 #[derive(Debug)]
 enum JsonItemType {
@@ -196,6 +190,5 @@ enum JsonItemType {
     Integer,
     Boolean,
     Null,
-    Array(Box<JsonItemType>)
+    Array(Box<JsonItemType>),
 }
-

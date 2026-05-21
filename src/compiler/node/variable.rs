@@ -103,7 +103,6 @@ impl Variable {
 
         let mut data_type_str = stringify_data_type(&var_data_type);
 
-
         return Ok(Variable {
             toks: toks,
             data_type: var_data_type,

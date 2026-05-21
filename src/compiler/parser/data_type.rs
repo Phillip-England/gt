@@ -4,7 +4,7 @@ pub enum DataType {
     Num,
     Bool,
     Custom(String),
-    Array(Box<DataType>)
+    Array(Box<DataType>),
 }
 
 pub fn stringify_data_type(dt: &DataType) -> String {
@@ -15,7 +15,7 @@ pub fn stringify_data_type(dt: &DataType) -> String {
         DataType::Custom(s) => s.clone(),
         // If it's an array, look inside the box, convert it to a string, and append "[]"
         DataType::Array(inner_box) => {
-            let inner_str = stringify_data_type(&**inner_box); 
+            let inner_str = stringify_data_type(&**inner_box);
             format!("{}[]", inner_str)
         }
     }
