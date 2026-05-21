@@ -1,4 +1,8 @@
-use crate::{app_err, compiler::{lexer::{Lexer}, node::Variable, parser::ParserErr, tokenizer::AdvancedToken}, err::{AppErr, AppErrKind}};
+use crate::{
+    app_err,
+    compiler::{lexer::Lexer, node::Variable, parser::ParserErr, tokenizer::AdvancedToken},
+    err::{AppErr, AppErrKind},
+};
 
 pub fn parse_variable(l: &mut Lexer<AdvancedToken>) -> Result<Variable, AppErr> {
     l.mark();
@@ -7,7 +11,9 @@ pub fn parse_variable(l: &mut Lexer<AdvancedToken>) -> Result<Variable, AppErr> 
             break;
         }
         if l.at_end() {
-            return Err(app_err!(AppErrKind::Parser(ParserErr::MissingSemiColon(String::from("could not locate a semicolon for 'let' token")))));   
+            return Err(app_err!(AppErrKind::Parser(ParserErr::MissingSemiColon(
+                String::from("could not locate a semicolon for 'let' token")
+            ))));
         }
         l.next();
     }

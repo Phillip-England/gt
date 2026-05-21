@@ -1,9 +1,7 @@
-use crate::{err::AppErr, compiler::tokenizer::{AdvancedToken, get_advanced_tokens, get_basic_tokens}};
-
-
-
-
-
+use crate::{
+    compiler::tokenizer::{AdvancedToken, get_advanced_tokens, get_basic_tokens},
+    err::AppErr,
+};
 
 pub fn tokenize(s: String) -> Result<Vec<AdvancedToken>, AppErr> {
     let basic_tokens = get_basic_tokens(s)?;

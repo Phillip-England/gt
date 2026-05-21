@@ -1,13 +1,10 @@
+use crate::cli::args;
 use crate::cli::args::ArgsErr;
 use crate::compiler::parser::{self, ParserErr};
-use crate::cli::{args};
 use crate::interpreter::{self, InterpreterErr};
 use crate::io::{self, IoErr};
 use crate::llm;
 use crate::llm::ollama::LlmErr;
-
-
-
 
 #[derive(Debug)]
 pub enum AppErrKind {
@@ -18,14 +15,12 @@ pub enum AppErrKind {
     Llm(LlmErr),
 }
 
-
 #[derive(Debug)]
 pub struct AppErr {
     pub kind: AppErrKind,
     pub file: &'static str,
     pub line: u32,
 }
-
 
 #[macro_export]
 macro_rules! app_err {
@@ -38,22 +33,24 @@ macro_rules! app_err {
     };
 }
 
-
 pub fn handle_app_err(app_err: AppErr) {
-    eprintln!("ERROR: {:?}\nfile: {:?}\nline: {:?}", app_err.kind, app_err.file, app_err.line);
+    eprintln!(
+        "ERROR: {:?}\nfile: {:?}\nline: {:?}",
+        app_err.kind, app_err.file, app_err.line
+    );
     match app_err.kind {
         AppErrKind::Io(compiler_err) => {
             io::handle_io_err(compiler_err);
-        },
+        }
         AppErrKind::Args(args_err) => {
             args::handle_arg_err(args_err);
-        },
+        }
         AppErrKind::Parser(ast_err) => {
-            parser::handle_ast_err(ast_err);    
-        },
+            parser::handle_ast_err(ast_err);
+        }
         AppErrKind::Interpreter(err) => {
             interpreter::handle_err(err);
-        },
+        }
         AppErrKind::Llm(err) => {
             llm::handle_err(err);
         }

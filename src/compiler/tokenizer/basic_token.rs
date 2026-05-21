@@ -1,7 +1,3 @@
-
-
-
-
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum BasicToken {
     Indicator(String),

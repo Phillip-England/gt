@@ -2,17 +2,12 @@ use crate::compiler::parser::DataType;
 
 #[derive(Clone, Debug)]
 pub struct DataField {
-    name: String,
-    t: DataType
+    pub name: String,
+    pub data_type: DataType,
 }
 
 impl DataField {
-
-    pub fn new(name: String, t: DataType) -> DataField {
-        return DataField {
-            name,
-            t,
-        }
+    pub fn new(name: String, data_type: DataType) -> DataField {
+        return DataField { name, data_type };
     }
-
 }

@@ -1,7 +1,3 @@
-
-
-
-
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum AdvancedToken {
     KeywordStruct,
@@ -22,5 +18,4 @@ pub enum AdvancedToken {
     EndOfFile,
     DoubleQuote,
     StrValue(String),
-
 }

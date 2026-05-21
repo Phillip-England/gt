@@ -1,2 +1,2 @@
 run:
-	cargo run run ./agent/main.gt
+	cargo run run gemma3:1b ./agent/main.gt

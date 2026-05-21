@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$ref": "#/$defs/Plan",
+  "$defs": {
+    "Plan": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PlanItem"
+          }
+        }
+      },
+      "required": ["items"],
+      "additionalProperties": false
+    },
+    "PlanItem": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "content": { "type": "string" }
+      },
+      "required": ["name", "content"],
+      "additionalProperties": false
+    }
+  }
+}

@@ -1,12 +1,9 @@
-use crate::{err::AppErr, compiler::tokenizer::{AdvancedToken, BasicToken}};
-
-
-
-
-
+use crate::{
+    compiler::tokenizer::{AdvancedToken, BasicToken},
+    err::AppErr,
+};
 
 pub fn get_advanced_tokens(toks: Vec<BasicToken>) -> Result<Vec<AdvancedToken>, AppErr> {
-
     let mut sorted: Vec<AdvancedToken> = vec![];
     for tok in toks {
         match tok {
@@ -29,7 +26,7 @@ pub fn get_advanced_tokens(toks: Vec<BasicToken>) -> Result<Vec<AdvancedToken>, 
                 }
                 if s == "=" {
                     sorted.push(AdvancedToken::OperatorAssignment);
-                    continue
+                    continue;
                 }
                 if s == "{" {
                     sorted.push(AdvancedToken::OpenedCurlyBrace);
@@ -56,22 +53,22 @@ pub fn get_advanced_tokens(toks: Vec<BasicToken>) -> Result<Vec<AdvancedToken>, 
                 }
                 // if we didnt find match
                 sorted.push(AdvancedToken::Indicator(s));
-            },
+            }
             BasicToken::PromptEnd => {
                 sorted.push(AdvancedToken::PromptEnd);
-            },
+            }
             BasicToken::PromptText(s) => {
                 sorted.push(AdvancedToken::PromptValue(s));
-            },
+            }
             BasicToken::PromptStart => {
                 sorted.push(AdvancedToken::PromptStart);
-            },
+            }
             BasicToken::SemiColon => {
                 sorted.push(AdvancedToken::SemiColon);
-            },
+            }
             BasicToken::DoubleQuote => {
                 sorted.push(AdvancedToken::DoubleQuote);
-            }, 
+            }
             BasicToken::StrValue(s) => {
                 sorted.push(AdvancedToken::StrValue(s));
             }

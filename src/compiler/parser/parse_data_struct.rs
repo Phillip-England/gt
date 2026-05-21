@@ -1,8 +1,13 @@
-use crate::{app_err, compiler::{lexer::Lexer, node::{self, DataStruct}, parser::ParserErr, tokenizer::AdvancedToken}, err::{AppErr, AppErrKind}};
-
-
-
-
+use crate::{
+    app_err,
+    compiler::{
+        lexer::Lexer,
+        node::{self, DataStruct},
+        parser::ParserErr,
+        tokenizer::AdvancedToken,
+    },
+    err::{AppErr, AppErrKind},
+};
 
 pub fn parse_data_struct(l: &mut Lexer<AdvancedToken>) -> Result<DataStruct, AppErr> {
     let mut is_struct_keyword = false;
@@ -14,7 +19,11 @@ pub fn parse_data_struct(l: &mut Lexer<AdvancedToken>) -> Result<DataStruct, App
         }
     }
     if !is_struct_keyword {
-        return Err(app_err!(AppErrKind::Parser(ParserErr::MissingOpeningCurlyBrace(String::from("expected to find opening curly brace after data keyword but failed to find it"))))) 
+        return Err(app_err!(AppErrKind::Parser(
+            ParserErr::MissingOpeningCurlyBrace(String::from(
+                "expected to find opening curly brace after data keyword but failed to find it"
+            ))
+        )));
     }
     l.mark();
     loop {
@@ -22,7 +31,11 @@ pub fn parse_data_struct(l: &mut Lexer<AdvancedToken>) -> Result<DataStruct, App
             break;
         }
         if l.at_end() {
-            return Err(app_err!(AppErrKind::Parser(ParserErr::MissingSemiColon(String::from("expected to find a closing curly brace for our data keyword but failed to find it"))))) 
+            return Err(app_err!(AppErrKind::Parser(ParserErr::MissingSemiColon(
+                String::from(
+                    "expected to find a closing curly brace for our data keyword but failed to find it"
+                )
+            ))));
         }
         l.next();
     }

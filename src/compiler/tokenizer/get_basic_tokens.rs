@@ -1,9 +1,8 @@
-use crate::{err::AppErr, compiler::lexer::Lexer, compiler::tokenizer::{BasicToken, BasicTokenState}};
-
-
-
-
-
+use crate::{
+    compiler::lexer::Lexer,
+    compiler::tokenizer::{BasicToken, BasicTokenState},
+    err::AppErr,
+};
 
 pub fn get_basic_tokens(content: String) -> Result<Vec<BasicToken>, AppErr> {
     let chars: Vec<char> = content.chars().collect();
@@ -12,7 +11,6 @@ pub fn get_basic_tokens(content: String) -> Result<Vec<BasicToken>, AppErr> {
     let mut state = BasicTokenState::Init;
     loop {
         match state {
-
             BasicTokenState::Init => {
                 if l.item() == ' ' || l.item() == '\n' {
                     l.next();
@@ -22,7 +20,7 @@ pub fn get_basic_tokens(content: String) -> Result<Vec<BasicToken>, AppErr> {
                     continue;
                 }
                 state = BasicTokenState::AtWordStart;
-            },
+            }
 
             BasicTokenState::AtWordStart => {
                 if l.item() == ' ' || l.item() == '\n' {
@@ -42,7 +40,6 @@ pub fn get_basic_tokens(content: String) -> Result<Vec<BasicToken>, AppErr> {
                     toks.push(BasicToken::PromptStart);
                     l.mark();
                     loop {
-
                         if l.item() != '>' {
                             l.next();
                             if l.at_end() {
@@ -60,7 +57,8 @@ pub fn get_basic_tokens(content: String) -> Result<Vec<BasicToken>, AppErr> {
                             }
                             continue;
                         }
-                        let mut prompt_str: String = l.collect(l.marked_pos(), l.pos()).into_iter().collect();
+                        let mut prompt_str: String =
+                            l.collect(l.marked_pos(), l.pos()).into_iter().collect();
                         prompt_str.pop();
                         prompt_str.pop();
                         toks.push(BasicToken::PromptText(prompt_str.trim().to_string()));
@@ -72,7 +70,6 @@ pub fn get_basic_tokens(content: String) -> Result<Vec<BasicToken>, AppErr> {
                     }
                     continue;
                 }
-
 
                 if word.starts_with("\"") && word.ends_with("\";") {
                     word.remove(0);
@@ -92,15 +89,9 @@ pub fn get_basic_tokens(content: String) -> Result<Vec<BasicToken>, AppErr> {
                 if l.at_end() {
                     break;
                 }
-
             }
-
-
-        } 
-        
+        }
     }
 
-
-
-    return Ok(toks)   
+    return Ok(toks);
 }
