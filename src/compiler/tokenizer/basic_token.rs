@@ -7,4 +7,5 @@ pub enum BasicToken {
     SemiColon,
     DoubleQuote,
     StrValue(String),
+    ArrayIndication,
 }

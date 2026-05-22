@@ -88,8 +88,8 @@ pub fn interpret_ast(ast: Ast, model: String) -> Result<(), AppErr> {
                 )));
             }
         };
-
         let substructs = data_type_struct.get_substruct_names(vec![], &data_struct_map);
+        println!("{:?}", data_struct_map);
         println!("{:?}", substructs);
         // let schema = JsonSchema::new();
         // println!("{:?}", schema);
@@ -161,7 +161,7 @@ pub fn err_variable_duplication(variable_name: String) -> AppErr {
 
 pub fn err_invalid_struct_access(struct_name: String) -> AppErr {
     return app_err!(AppErrKind::Interpreter(InterpreterErr::StructDuplication(
-        format!("The struct named {} has been duplicated", struct_name)
+        format!("The struct named {} does not exist", struct_name)
     )));
 }
 

@@ -18,4 +18,5 @@ pub enum AdvancedToken {
     EndOfFile,
     DoubleQuote,
     StrValue(String),
+    ArrayIndication,
 }

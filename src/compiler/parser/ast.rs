@@ -22,6 +22,7 @@ pub fn parse_ast(toks: Vec<AdvancedToken>) -> Result<Ast, AppErr> {
     loop {
         let tok = l.item();
         match tok {
+            AdvancedToken::ArrayIndication => {}
             AdvancedToken::Colon => {}
             AdvancedToken::SemiColon => {}
             AdvancedToken::Indicator(_) => {}

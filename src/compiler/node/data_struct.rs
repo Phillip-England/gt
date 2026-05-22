@@ -56,7 +56,7 @@ impl DataStruct {
                             AdvancedToken::Indicator(s) => {
                                 let field_name = s.to_owned();
                                 field_names.push(field_name);
-                            }
+                            },
                             _ => {}
                         }
                     }
@@ -68,14 +68,19 @@ impl DataStruct {
                     AdvancedToken::KeywordNum => field_types.push(DataType::Num),
                     AdvancedToken::KeywordStr => field_types.push(DataType::Str),
                     AdvancedToken::KeywordBool => field_types.push(DataType::Bool),
-                    AdvancedToken::Indicator(s) => field_types.push(DataType::Custom(s)),
-                    _ => {}
+                    AdvancedToken::Indicator(s) => {
+                        field_types.push(DataType::Custom(s))
+                    },              
+                    _ => {
+
+                    }
                 }
             }
             count = count + 1;
         }
 
         // our field names and data types should be same len
+        println!("{:?} {:?}", field_names, field_types);
         if field_names.len() != field_types.len() {
             return Err(app_err!(AppErrKind::Parser(ParserErr::MalformedDataType(
                 String::from(
@@ -121,9 +126,9 @@ impl DataStruct {
     ) -> Result<Vec<String>, AppErr> {
         for field in self.node_fields.iter() {
             match &field.data_type {
-                DataType::Str => todo!(),
-                DataType::Num => todo!(),
-                DataType::Bool => todo!(),
+                DataType::Str => {},
+                DataType::Num => {},
+                DataType::Bool => {},
                 DataType::Custom(substruct_name) => {
                     let inner_struct = match data_struct_map.get(substruct_name) {
                         Some(data_struct) => data_struct,
@@ -131,10 +136,12 @@ impl DataStruct {
                             return Err(err_invalid_struct_access(substruct_name.clone()));
                         }
                     };
+                    vec = inner_struct.get_substruct_names(vec, data_struct_map)?;
+                    vec.push(inner_struct.name.clone());
                 }
                 DataType::Array(data_type) => todo!(),
             }
         }
-        return Ok(vec![]);
+        return Ok(vec);
     }
 }

@@ -6,6 +6,7 @@ struct PlanItem {
 
 struct Plan {
     items PlanItem[]
+    desc str
 };
 
 

@@ -5,10 +5,14 @@ pub enum ParserErr {
     MalformedDataType(String),
     MalformedVariable(String),
     MissingSemiColon(String),
+    MisplacedArrayIndication(String),
 }
 
 pub fn handle_ast_err(err: ParserErr) {
     match err {
+        ParserErr::MisplacedArrayIndication(s) => {
+            eprintln!("array indication in invalid location: {}", s);
+        },
         ParserErr::MissingSemiColon(s) => {
             eprintln!("missing semicolon: {}", s);
         }

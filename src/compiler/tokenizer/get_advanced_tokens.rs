@@ -7,6 +7,10 @@ pub fn get_advanced_tokens(toks: Vec<BasicToken>) -> Result<Vec<AdvancedToken>, 
     let mut sorted: Vec<AdvancedToken> = vec![];
     for tok in toks {
         match tok {
+            BasicToken::ArrayIndication => {
+                sorted.push(AdvancedToken::ArrayIndication);
+                continue;
+            },
             BasicToken::Indicator(mut s) => {
                 if s == "struct" {
                     sorted.push(AdvancedToken::KeywordStruct);
