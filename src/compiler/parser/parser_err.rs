@@ -6,6 +6,7 @@ pub enum ParserErr {
     MalformedVariable(String),
     MissingSemiColon(String),
     MisplacedArrayIndication(String),
+    MalformedStruct(String),
 }
 
 pub fn handle_ast_err(err: ParserErr) {
@@ -27,6 +28,9 @@ pub fn handle_ast_err(err: ParserErr) {
         }
         ParserErr::MalformedVariable(s) => {
             eprintln!("AST ERR: malformed variable: {}", s);
+        },
+        ParserErr::MalformedStruct(s) => {
+            eprintln!("malformed struct: {}", s);
         }
     }
 }

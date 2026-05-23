@@ -3,9 +3,7 @@ use std::collections::HashMap;
 use crate::{
     app_err,
     compiler::{
-        node::DataField,
-        parser::{DataType, ParserErr},
-        tokenizer::AdvancedToken,
+        lexer, node::DataField, parser::{DataType, ParserErr}, tokenizer::AdvancedToken
     },
     err::{AppErr, AppErrKind},
     interpreter::{InterpreterErr, err_invalid_struct_access},
@@ -40,47 +38,100 @@ impl DataStruct {
             )));
         }
 
-        let mut count = 0;
         let mut field_names: Vec<String> = vec![];
         let mut field_types: Vec<DataType> = vec![];
-        for tok in toks {
-            if count > 2 {
-                if matches!(tok, AdvancedToken::ClosedCurlyBrace) {
-                    count = count + 1;
-                    continue;
-                }
-                // odd should be field name
-                if count % 2 == 1 {
-                    if matches!(tok, AdvancedToken::Indicator(_)) {
-                        match tok {
-                            AdvancedToken::Indicator(s) => {
-                                let field_name = s.to_owned();
-                                field_names.push(field_name);
-                            },
-                            _ => {}
+        
+
+        // 05/22/26 - was using even odd approach for field type/value extraction, had to implement new approach with addition or tracking '[]' tokens –– opted in to just use an generic lexer for the job because it includes peeking for easier extraction
+        
+        let mut found_name = false;
+        let field_toks: Vec<AdvancedToken> = toks.into_iter().filter_map(|t| {
+            match t {
+                AdvancedToken::Indicator(_) => { 
+                    if !found_name {
+                        found_name = true;
+                        return None
+                    }
+                    Some(t)
+                },
+                AdvancedToken::KeywordNum => { Some(t) },
+                AdvancedToken::KeywordBool => { Some(t) },
+                AdvancedToken::KeywordStr => { Some(t) },
+                AdvancedToken::ArrayIndication => { Some(t) }
+                _ => { None }
+            }
+        }).collect();
+
+        let mut tok_lex = lexer::Lexer::new(field_toks);
+
+        while !tok_lex.at_end() {
+
+            let is_array = match tok_lex.peek(2) {
+                AdvancedToken::ArrayIndication => true,
+                _ => false
+            };
+
+            match tok_lex.item() {
+                AdvancedToken::Indicator(s) => {
+                    field_names.push(s);
+                    match tok_lex.peek(1) {
+                        AdvancedToken::KeywordBool => {
+                            if is_array {
+                                field_types.push(DataType::Array(Box::new(DataType::Bool)))
+                            } else {
+                                field_types.push(DataType::Bool)
+                            }
+                        },
+                        AdvancedToken::KeywordStr => {
+                            if is_array {
+                                field_types.push(DataType::Array(Box::new(DataType::Str))) 
+                            } else {
+                                field_types.push(DataType::Str)
+                            }
+                        },
+                        AdvancedToken::KeywordNum => {
+                            if is_array {
+                                field_types.push(DataType::Array(Box::new(DataType::Num))) 
+                            } else {
+                                field_types.push(DataType::Num)
+                            }
+                        },
+                        AdvancedToken::Indicator(s) => {
+                            if is_array {
+                                field_types.push(DataType::Array(Box::new(DataType::Custom(s))))
+                            } else {
+                                field_types.push(DataType::Custom(s))
+                            }
+                        },
+                        AdvancedToken::ClosedCurlyBrace => {
+
+                        },
+                        AdvancedToken::SemiColon => {
+
+                        },
+                        _ => {
+                            return Err(app_err!(AppErrKind::Parser(ParserErr::MalformedStruct(format!("struct named {} is malformed", data_type_name)))))
                         }
                     }
-                    count = count + 1;
-                    continue;
-                }
-                match tok {
-                    // even should be data type
-                    AdvancedToken::KeywordNum => field_types.push(DataType::Num),
-                    AdvancedToken::KeywordStr => field_types.push(DataType::Str),
-                    AdvancedToken::KeywordBool => field_types.push(DataType::Bool),
-                    AdvancedToken::Indicator(s) => {
-                        field_types.push(DataType::Custom(s))
-                    },              
-                    _ => {
-
-                    }
-                }
+                },
+                _ => {}
             }
-            count = count + 1;
+
+            if is_array {
+                tok_lex.next();
+                tok_lex.next();
+                tok_lex.next(); 
+            } else {
+                tok_lex.next();
+                tok_lex.next();
+            }
+
+        
         }
 
+
         // our field names and data types should be same len
-        println!("{:?} {:?}", field_names, field_types);
+        println!("names: {:?}\ntypes: {:?}", field_names, field_types);
         if field_names.len() != field_types.len() {
             return Err(app_err!(AppErrKind::Parser(ParserErr::MalformedDataType(
                 String::from(
