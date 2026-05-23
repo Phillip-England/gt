@@ -1,8 +1,4 @@
 
-struct Person {
-    name str
-};
-
 struct PlanItem {
     name str
     content str
@@ -11,7 +7,6 @@ struct PlanItem {
 struct Plan {
     items PlanItem[]
     desc str
-    person Person
 };
 
 

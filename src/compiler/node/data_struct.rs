@@ -172,10 +172,10 @@ impl DataStruct {
         &self,
         mut vec: Vec<String>,
         data_struct_map: &HashMap<String, DataStruct>,
+        parent: &DataStruct
     ) -> Result<Vec<String>, AppErr> {
 
-       let nodes = self.node_fields.clone();
-
+        let nodes = self.node_fields.clone();
 
         for field in nodes.into_iter() {
             match field.data_type {
@@ -189,7 +189,11 @@ impl DataStruct {
                             return Err(err_invalid_struct_access(substruct_name.clone()));
                         }
                     };
-                    vec = inner_struct.get_substruct_names(vec, data_struct_map)?;
+                    vec = inner_struct.get_substruct_names(vec, data_struct_map, &parent)?;
+                        let inner_struct_name = inner_struct.name.clone();
+                        if vec.contains(&inner_struct_name) {
+                            return Err(app_err!(AppErrKind::Parser(ParserErr::InfiniteStructReference(format!("the struct named {} has an infinite reference loop", parent.name)))))
+                        } 
                     vec.push(inner_struct.name.clone());
                 }
                 DataType::Array(data_type_box) => {
@@ -206,7 +210,12 @@ impl DataStruct {
                                     return Err(err_invalid_struct_access(array_data_type_name.clone()));
                                 }
                             };
-                            vec = inner_struct.get_substruct_names(vec, data_struct_map)?;
+
+                            vec = inner_struct.get_substruct_names(vec, data_struct_map, &parent)?;
+                            let inner_struct_name = inner_struct.name.clone();
+                            if vec.contains(&inner_struct_name) {
+                                return Err(app_err!(AppErrKind::Parser(ParserErr::InfiniteStructReference(format!("the struct named {} has an infinity reference loop", parent.name)))))
+                            }
                             vec.push(inner_struct.name.clone());
                         },
                         DataType::Array(data_type) => {}, // <== deeply nested arrays?

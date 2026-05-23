@@ -88,7 +88,8 @@ pub fn interpret_ast(ast: Ast, model: String) -> Result<(), AppErr> {
                 )));
             }
         };
-        let substructs = data_type_struct.get_substruct_names(vec![], &data_struct_map);
+
+        let substructs = data_type_struct.get_substruct_names(vec![], &data_struct_map, &data_type_struct)?;
         // println!("{:?}", data_struct_map);
         println!("{:?}", substructs);
         // let schema = JsonSchema::new();

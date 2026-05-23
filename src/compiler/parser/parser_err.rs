@@ -7,10 +7,14 @@ pub enum ParserErr {
     MissingSemiColon(String),
     MisplacedArrayIndication(String),
     MalformedStruct(String),
+    InfiniteStructReference(String),
 }
 
 pub fn handle_ast_err(err: ParserErr) {
     match err {
+        ParserErr::InfiniteStructReference(s) => {
+            eprintln!("infinite struct reference: {}", s)
+        },
         ParserErr::MisplacedArrayIndication(s) => {
             eprintln!("array indication in invalid location: {}", s);
         },
