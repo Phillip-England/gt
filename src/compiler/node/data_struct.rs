@@ -129,9 +129,7 @@ impl DataStruct {
         
         }
 
-
         // our field names and data types should be same len
-        println!("names: {:?}\ntypes: {:?}", field_names, field_types);
         if field_names.len() != field_types.len() {
             return Err(app_err!(AppErrKind::Parser(ParserErr::MalformedDataType(
                 String::from(
@@ -175,13 +173,17 @@ impl DataStruct {
         mut vec: Vec<String>,
         data_struct_map: &HashMap<String, DataStruct>,
     ) -> Result<Vec<String>, AppErr> {
-        for field in self.node_fields.iter() {
-            match &field.data_type {
+
+       let nodes = self.node_fields.clone();
+
+
+        for field in nodes.into_iter() {
+            match field.data_type {
                 DataType::Str => {},
                 DataType::Num => {},
                 DataType::Bool => {},
                 DataType::Custom(substruct_name) => {
-                    let inner_struct = match data_struct_map.get(substruct_name) {
+                    let inner_struct = match data_struct_map.get(&substruct_name) {
                         Some(data_struct) => data_struct,
                         None => {
                             return Err(err_invalid_struct_access(substruct_name.clone()));
@@ -190,7 +192,26 @@ impl DataStruct {
                     vec = inner_struct.get_substruct_names(vec, data_struct_map)?;
                     vec.push(inner_struct.name.clone());
                 }
-                DataType::Array(data_type) => todo!(),
+                DataType::Array(data_type_box) => {
+                    let inner_data_type = *data_type_box;
+                    match &inner_data_type {
+                        DataType::Str => {},
+                        DataType::Num => {},
+                        DataType::Bool => {},
+                        DataType::Custom(s) => {
+                            let array_data_type_name = s.as_str().to_string();
+                            let inner_struct = match data_struct_map.get(&array_data_type_name) {
+                                Some(data_struct) => data_struct,
+                                None => {
+                                    return Err(err_invalid_struct_access(array_data_type_name.clone()));
+                                }
+                            };
+                            vec = inner_struct.get_substruct_names(vec, data_struct_map)?;
+                            vec.push(inner_struct.name.clone());
+                        },
+                        DataType::Array(data_type) => {}, // <== deeply nested arrays?
+                    };
+                },
             }
         }
         return Ok(vec);
