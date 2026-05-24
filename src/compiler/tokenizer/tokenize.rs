@@ -1,6 +1,6 @@
 use crate::{
     compiler::tokenizer::{AdvancedToken, get_advanced_tokens, get_basic_tokens},
-    err::{ErrApp},
+    err::ErrApp,
 };
 
 pub fn tokenize(s: String) -> Result<Vec<AdvancedToken>, ErrApp> {

@@ -1,6 +1,6 @@
 use crate::{
     compiler::tokenizer::{AdvancedToken, BasicToken},
-    err::{ErrApp},
+    err::ErrApp,
 };
 
 pub fn get_advanced_tokens(toks: Vec<BasicToken>) -> Result<Vec<AdvancedToken>, ErrApp> {
@@ -10,7 +10,7 @@ pub fn get_advanced_tokens(toks: Vec<BasicToken>) -> Result<Vec<AdvancedToken>, 
             BasicToken::ArrayIndication => {
                 sorted.push(AdvancedToken::ArrayIndication);
                 continue;
-            },
+            }
             BasicToken::Indicator(mut s) => {
                 if s == "struct" {
                     sorted.push(AdvancedToken::KeywordStruct);

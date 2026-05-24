@@ -1,14 +1,7 @@
-use crate::err::Loc;
-
-
-
+use crate::err::{ErrMsg, Loc};
 
 #[derive(Debug, thiserror::Error)]
 pub enum ErrIo {
-
-    #[error("{loc}\n failed to load file at path: {path}")]
-    LoadFileErr {
-        loc: Loc,
-        path: String,
-    },
+    #[error("{0}\nfailed to load file")]
+    ReadFileErr(ErrMsg),
 }

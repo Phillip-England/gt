@@ -1,10 +1,5 @@
 use crate::{
-    compiler::{
-        lexer::Lexer,
-        node::Variable,
-        parser::ErrParser,
-        tokenizer::AdvancedToken,
-    },
+    compiler::{lexer::Lexer, node::Variable, parser::ErrParser, tokenizer::AdvancedToken},
     fail,
 };
 

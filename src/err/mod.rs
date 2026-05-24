@@ -1,3 +1,3 @@
-pub mod app_err;
+pub mod err_app;
 
-pub use app_err::*;
+pub use err_app::*;

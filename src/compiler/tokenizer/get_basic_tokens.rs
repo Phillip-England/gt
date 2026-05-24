@@ -83,14 +83,13 @@ pub fn get_basic_tokens(content: String) -> Result<Vec<BasicToken>, ErrApp> {
                     continue;
                 }
 
-
                 if word.ends_with("[]") {
                     word.pop();
                     word.pop();
                     toks.push(BasicToken::Indicator(word));
                     toks.push(BasicToken::ArrayIndication);
                     l.next();
-                    continue
+                    continue;
                 }
 
                 toks.push(BasicToken::Indicator(word));

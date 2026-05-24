@@ -1,8 +1,6 @@
 use std::fs;
 
-use crate::{
-    io::ErrIo, loc,
-};
+use crate::{fail, io::ErrIo, loc};
 
 pub fn read_to_string(path: String) -> Result<String, ErrIo> {
     let content_result = fs::read_to_string(path.clone());
@@ -12,7 +10,7 @@ pub fn read_to_string(path: String) -> Result<String, ErrIo> {
             content = str;
         }
         Err(_err) => {
-            return Err(ErrIo::LoadFileErr { loc: loc!(), path });
+            return fail!(ErrIo::ReadFileErr, "failed to read file at {}", path)
         }
     }
     return Ok(content);

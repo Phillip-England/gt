@@ -6,7 +6,7 @@ use crate::{
     compiler::{
         node::{DataStruct, Node, Variable},
         parser::{Ast, DataType},
-        tokenizer::AdvancedToken,
+        tokenizer::AdvancedToken, validator::ErrValidator,
     },
     err::ErrApp,
     fail,
@@ -17,44 +17,18 @@ use crate::{
     },
 };
 
+#[derive(Debug)]
+pub struct Interpreter {
+    pub ast: Ast,
+    pub map_structs: HashMap<String, DataStruct>,
+    pub map_vars: HashMap<String, DataStruct>
+}
+
+
 pub fn interpret_ast(ast: Ast, model: String) -> Result<(), ErrApp> {
     let mut data_struct_map: HashMap<String, DataStruct> = HashMap::new();
     let mut variable_map: HashMap<String, Variable> = HashMap::new();
 
-    // gaining knowledge of available artifacts
-    for node in ast.head_nodes {
-        match node {
-            Node::DataStruct(data_struct) => {
-                let key = data_struct.name.clone();
-                let exists = data_struct_map.contains_key(&key);
-
-                if exists {
-                    return fail!(
-                        ErrInterpreter::StructDuplication,
-                        "the struct named {} is duplicated",
-                        data_struct.name
-                    );
-                }
-
-                data_struct_map.insert(data_struct.name.clone(), data_struct);
-            }
-
-            Node::Variable(variable) => {
-                let key = variable.name.clone();
-                let exists = variable_map.contains_key(&key);
-
-                if exists {
-                    return fail!(
-                        ErrInterpreter::VariableDuplication,
-                        "the variable named {} has been duplicated",
-                        variable.name
-                    );
-                }
-
-                variable_map.insert(variable.name.clone(), variable);
-            }
-        }
-    }
 
     // extracting our prompts
     let prompts: Vec<Variable> = variable_map
@@ -88,7 +62,7 @@ pub fn interpret_ast(ast: Ast, model: String) -> Result<(), ErrApp> {
             Some(s) => s,
             None => {
                 return fail!(
-                    ErrInterpreter::InvalidVariableType,
+                    ErrValidator::InvalidVariableType,
                     "invalid variable type: {}",
                     p.data_type_str
                 );
@@ -113,7 +87,9 @@ pub fn interpret_ast(ast: Ast, model: String) -> Result<(), ErrApp> {
 
         println!("{:?}", substructs);
 
-        let res = stream_prompt(&client, &model, &p.value)?;
+        let res = stream_prompt(&client, &model, &p.value, |chunk| {
+            println!("{:?}", chunk);
+        })?;
 
         // response validation
         println!("{:?}", res.text);
@@ -121,13 +97,6 @@ pub fn interpret_ast(ast: Ast, model: String) -> Result<(), ErrApp> {
 
     Ok(())
 }
-
-#[derive(Debug)]
-pub struct Interpreter {
-    pub ast: Ast,
-}
-
-impl Interpreter {}
 
 const JSON_DEF_CURSOR: &str = "DEF_CURSOR";
 const JSON_CURSOR: &str = "JSON_CURSOR";

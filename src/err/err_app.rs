@@ -1,5 +1,6 @@
 use crate::cli::args::ErrArgs;
 use crate::compiler::parser::ErrParser;
+use crate::compiler::validator::ErrValidator;
 use crate::interpreter::ErrInterpreter;
 use crate::io::ErrIo;
 use crate::llm::ErrLlm;
@@ -20,6 +21,10 @@ pub enum ErrApp {
 
     #[error(transparent)]
     Llm(#[from] ErrLlm),
+
+    #[error(transparent)]
+    Validator(#[from] ErrValidator)
+
 }
 
 #[derive(Debug, Clone)]
@@ -68,9 +73,7 @@ macro_rules! err_msg {
     };
 }
 
-
-
-/*  
+/*
 DEBUGGING NOTE:
 
 You will find youself here a lot dealing with the 'into()' call at the end of the macro below.

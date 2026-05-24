@@ -2,7 +2,6 @@ use crate::err::ErrMsg;
 
 #[derive(Debug, thiserror::Error)]
 pub enum ErrParser {
-
     #[error("{0}")]
     MissingOpeningCurlyBrace(ErrMsg),
 
@@ -26,5 +25,4 @@ pub enum ErrParser {
 
     #[error("{0}")]
     InvalidStructAccess(ErrMsg),
-
 }
