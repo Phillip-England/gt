@@ -1,12 +1,9 @@
 use std::collections::HashMap;
 
 use crate::{
-    app_err,
     compiler::{
-        lexer, node::DataField, parser::{DataType, ParserErr}, tokenizer::AdvancedToken
-    },
-    err::{AppErr, AppErrKind},
-    interpreter::{InterpreterErr, err_invalid_struct_access},
+        lexer, node::DataField, parser::{DataType, ErrParser}, tokenizer::AdvancedToken
+    }, err::ErrApp, fail, loc
 };
 
 #[derive(Clone, Debug)]
@@ -16,26 +13,18 @@ pub struct DataStruct {
 }
 
 impl DataStruct {
-    pub fn new(toks: Vec<AdvancedToken>) -> Result<DataStruct, AppErr> {
+    pub fn new(toks: Vec<AdvancedToken>) -> Result<DataStruct, ErrParser> {
         // extracting data type name
         let second_tok_opt = toks.get(1).clone();
         if second_tok_opt.is_none() {
-            return Err(app_err!(AppErrKind::Parser(ParserErr::MalformedDataType(
-                String::from(
-                    "attempted to access token containing data type name but could not locate it"
-                )
-            ))));
+            return fail!(ErrParser::MalformedDataStruct, "attempted to access a token containing data struct name but could not locate it");
         }
         let second_tok = second_tok_opt.unwrap();
         let data_type_name: String;
         if let AdvancedToken::Indicator(s) = second_tok {
             data_type_name = s.clone();
         } else {
-            return Err(app_err!(AppErrKind::Parser(
-                ParserErr::ExpectedIndicatorToken(String::from(
-                    "attempted to access tokens for ast generation, and expected an indicator token, but could not find one"
-                ))
-            )));
+            return fail!(ErrParser::ExpectedIndicatorToken, "attempted to access tokens for ast generation and expected and indicator token but could not find one");
         }
 
         let mut field_names: Vec<String> = vec![];
@@ -110,7 +99,7 @@ impl DataStruct {
 
                         },
                         _ => {
-                            return Err(app_err!(AppErrKind::Parser(ParserErr::MalformedStruct(format!("struct named {} is malformed", data_type_name)))))
+                            return fail!(ErrParser::MalformedDataStruct, "struct named {} is malformed", data_type_name);
                         }
                     }
                 },
@@ -131,11 +120,7 @@ impl DataStruct {
 
         // our field names and data types should be same len
         if field_names.len() != field_types.len() {
-            return Err(app_err!(AppErrKind::Parser(ParserErr::MalformedDataType(
-                String::from(
-                    "expected our field names and field types to be the same length but they were not"
-                )
-            ))));
+            return fail!(ErrParser::MalformedDataStruct, "expected our field names and field types to be the same length but they were not");
         }
 
         let mut fields: Vec<DataField> = vec![];
@@ -146,16 +131,12 @@ impl DataStruct {
             }
             let name_opt = field_names.get(count);
             if name_opt.is_none() {
-                return Err(app_err!(AppErrKind::Parser(ParserErr::MalformedDataType(
-                    String::from("could not find field name in expected location")
-                ))));
+                return fail!(ErrParser::MalformedDataStruct, "could not find field name in expected location");
             }
             let name = name_opt.unwrap();
             let t_opt = field_types.get(count);
             if t_opt.is_none() {
-                return Err(app_err!(AppErrKind::Parser(ParserErr::MalformedDataType(
-                    String::from("could not find field type in expected location")
-                ))));
+                return fail!(ErrParser::MalformedDataStruct, "could not find field type in expected location");
             }
             let t = t_opt.unwrap();
             let field = DataField::new(name.to_owned(), t.clone());
@@ -173,7 +154,7 @@ impl DataStruct {
         mut vec: Vec<String>,
         data_struct_map: &HashMap<String, DataStruct>,
         parent: &DataStruct
-    ) -> Result<Vec<String>, AppErr> {
+    ) -> Result<Vec<String>, ErrApp> {
 
         let nodes = self.node_fields.clone();
 
@@ -186,13 +167,13 @@ impl DataStruct {
                     let inner_struct = match data_struct_map.get(&substruct_name) {
                         Some(data_struct) => data_struct,
                         None => {
-                            return Err(err_invalid_struct_access(substruct_name.clone()));
+                            return fail!(ErrParser::InvalidStructAccess, "attempted to access a struct named {} but it does not exist", substruct_name.clone());
                         }
                     };
                     vec = inner_struct.get_substruct_names(vec, data_struct_map, &parent)?;
                         let inner_struct_name = inner_struct.name.clone();
                         if vec.contains(&inner_struct_name) {
-                            return Err(app_err!(AppErrKind::Parser(ParserErr::InfiniteStructReference(format!("the struct named {} has an infinite reference loop", parent.name)))))
+                            return fail!(ErrParser::InfiniteStructReference, "the struct named {} has an infinite reference loop", parent.name);
                         } 
                     vec.push(inner_struct.name.clone());
                 }
@@ -207,14 +188,14 @@ impl DataStruct {
                             let inner_struct = match data_struct_map.get(&array_data_type_name) {
                                 Some(data_struct) => data_struct,
                                 None => {
-                                    return Err(err_invalid_struct_access(array_data_type_name.clone()));
+                                    return fail!(ErrParser::InvalidStructAccess, "the struct named {} does not exist", parent.name);
                                 }
                             };
 
                             vec = inner_struct.get_substruct_names(vec, data_struct_map, &parent)?;
                             let inner_struct_name = inner_struct.name.clone();
                             if vec.contains(&inner_struct_name) {
-                                return Err(app_err!(AppErrKind::Parser(ParserErr::InfiniteStructReference(format!("the struct named {} has an infinity reference loop", parent.name)))))
+                                return fail!(ErrParser::InfiniteStructReference, "the struct named {} has an infinite reference loop", parent.name);
                             }
                             vec.push(inner_struct.name.clone());
                         },

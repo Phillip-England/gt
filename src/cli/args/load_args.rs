@@ -1,15 +1,13 @@
 use std::env;
 
 use crate::{
-    app_err,
-    cli::args::ArgsErr,
-    err::{AppErr, AppErrKind},
+    cli::args::ErrArgs, fail,
 };
 
-pub fn load_args() -> Result<Vec<String>, AppErr> {
+pub fn load_args() -> Result<Vec<String>, ErrArgs> {
     let args: Vec<String> = env::args().collect();
     if args.len() < 2 {
-        return Err(app_err!(AppErrKind::Args(ArgsErr::MissingArgs)));
+        return fail!(ErrArgs::VoidPrimaryArg, "");
     }
     return Ok(args);
 }

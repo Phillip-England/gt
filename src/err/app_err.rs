@@ -1,58 +1,90 @@
-use crate::cli::args;
-use crate::cli::args::ArgsErr;
-use crate::compiler::parser::{self, ParserErr};
-use crate::interpreter::{self, InterpreterErr};
-use crate::io::{self, IoErr};
-use crate::llm;
-use crate::llm::ollama::LlmErr;
+use crate::cli::args::ErrArgs;
+use crate::compiler::parser::ErrParser;
+use crate::interpreter::ErrInterpreter;
+use crate::io::ErrIo;
+use crate::llm::ErrLlm;
 
-#[derive(Debug)]
-pub enum AppErrKind {
-    Io(IoErr),
-    Args(ArgsErr),
-    Parser(ParserErr),
-    Interpreter(InterpreterErr),
-    Llm(LlmErr),
+#[derive(Debug, thiserror::Error)]
+pub enum ErrApp {
+    #[error(transparent)]
+    Parser(#[from] ErrParser),
+
+    #[error(transparent)]
+    Args(#[from] ErrArgs),
+
+    #[error(transparent)]
+    Io(#[from] ErrIo),
+
+    #[error(transparent)]
+    Interpreter(#[from] ErrInterpreter),
+
+    #[error(transparent)]
+    Llm(#[from] ErrLlm),
 }
 
-#[derive(Debug)]
-pub struct AppErr {
-    pub kind: AppErrKind,
+#[derive(Debug, Clone)]
+pub struct Loc {
     pub file: &'static str,
     pub line: u32,
+    pub column: u32,
+}
+
+impl std::fmt::Display for Loc {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}:{}:{}", self.file, self.line, self.column)
+    }
 }
 
 #[macro_export]
-macro_rules! app_err {
-    ($kind:expr) => {
-        AppErr {
-            kind: $kind,
+macro_rules! loc {
+    () => {
+        $crate::err::Loc {
             file: file!(),
             line: line!(),
+            column: column!(),
         }
     };
 }
 
-pub fn handle_app_err(app_err: AppErr) {
-    eprintln!(
-        "ERROR: {:?}\nfile: {:?}\nline: {:?}",
-        app_err.kind, app_err.file, app_err.line
-    );
-    match app_err.kind {
-        AppErrKind::Io(compiler_err) => {
-            io::handle_io_err(compiler_err);
+#[derive(Debug, Clone)]
+pub struct ErrMsg {
+    pub loc: Loc,
+    pub msg: String,
+}
+
+impl std::fmt::Display for ErrMsg {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}\n{}", self.loc, self.msg)
+    }
+}
+
+#[macro_export]
+macro_rules! err_msg {
+    ($($arg:tt)*) => {
+        $crate::err::ErrMsg {
+            loc: $crate::loc!(),
+            msg: format!($($arg)*),
         }
-        AppErrKind::Args(args_err) => {
-            args::handle_arg_err(args_err);
-        }
-        AppErrKind::Parser(ast_err) => {
-            parser::handle_ast_err(ast_err);
-        }
-        AppErrKind::Interpreter(err) => {
-            interpreter::handle_err(err);
-        }
-        AppErrKind::Llm(err) => {
-            llm::handle_err(err);
-        }
+    };
+}
+
+
+
+/*  
+DEBUGGING NOTE:
+
+You will find youself here a lot dealing with the 'into()' call at the end of the macro below.
+
+This may occur if you forget to return fail!() from your functions.
+
+So, if you find yourself here, and the 'into()' call is not working, go investigate and make sure you are actually returning fail!() from all your functions. If you just call fail!() without returning, here you shall be.
+
+Also, why are broke people so stubborn? Cause they got no change! Ha!
+
+*/
+#[macro_export]
+macro_rules! fail {
+    ($err:path, $($arg:tt)*) => {
+        Err($err($crate::err_msg!($($arg)*)).into())
     };
 }

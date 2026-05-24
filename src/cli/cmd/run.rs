@@ -1,11 +1,11 @@
 use crate::{
     compiler::{parser::parse_ast, tokenizer::tokenize},
-    err::AppErr,
+    err::{ErrApp},
     interpreter::interpret_ast,
     io::read_to_string,
 };
 
-pub fn run(filepath: String, model: String) -> Result<(), AppErr> {
+pub fn run(filepath: String, model: String) -> Result<(), ErrApp> {
     let content = read_to_string(filepath)?;
     let toks = tokenize(content)?;
     // println!("{:?}", toks);

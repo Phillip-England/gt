@@ -5,7 +5,7 @@ use crate::{
         parser::{parse_data_struct, parse_variable},
         tokenizer::AdvancedToken,
     },
-    err::AppErr,
+    err::{ErrApp},
 };
 
 #[derive(Debug, Clone)]
@@ -13,7 +13,7 @@ pub struct Ast {
     pub head_nodes: Vec<Node>,
 }
 
-pub fn parse_ast(toks: Vec<AdvancedToken>) -> Result<Ast, AppErr> {
+pub fn parse_ast(toks: Vec<AdvancedToken>) -> Result<Ast, ErrApp> {
     // println!("{:?}", toks);
 
     let mut ast: Ast = Ast { head_nodes: vec![] };

@@ -1,6 +1,6 @@
 use crate::{
     cli::cmd::{PrimaryCmd, primary_cmd_as_str},
-    err::{AppErr, handle_app_err},
+    err::{ErrApp},
 };
 
 mod cli;
@@ -13,15 +13,21 @@ mod llm;
 fn main() {
     match run() {
         Err(err) => {
-            handle_app_err(err);
+            println!("{:?}", err);
             std::process::exit(1);
         }
         _ => {}
     }
 }
-fn run() -> Result<(), AppErr> {
+
+fn run() -> Result<(), ErrApp> {
     let args = cli::args::load_args()?;
     let (args, first_arg) = cli::args::get_arg(args, 1)?;
+
+
+    /*  
+        We do arg extraction at this level. No validation should need to be complete once we actually run our command. All of this should be done on this level so commands can solely focus on their implementation and none of the fluff
+    */
 
     if first_arg == primary_cmd_as_str(PrimaryCmd::Help) {
         cli::cmd::help();

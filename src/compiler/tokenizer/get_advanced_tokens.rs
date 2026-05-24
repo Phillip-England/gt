@@ -1,9 +1,9 @@
 use crate::{
     compiler::tokenizer::{AdvancedToken, BasicToken},
-    err::AppErr,
+    err::{ErrApp},
 };
 
-pub fn get_advanced_tokens(toks: Vec<BasicToken>) -> Result<Vec<AdvancedToken>, AppErr> {
+pub fn get_advanced_tokens(toks: Vec<BasicToken>) -> Result<Vec<AdvancedToken>, ErrApp> {
     let mut sorted: Vec<AdvancedToken> = vec![];
     for tok in toks {
         match tok {

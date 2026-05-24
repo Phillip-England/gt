@@ -1,10 +1,10 @@
 use crate::{
     compiler::lexer::Lexer,
     compiler::tokenizer::{BasicToken, BasicTokenState},
-    err::AppErr,
+    err::ErrApp,
 };
 
-pub fn get_basic_tokens(content: String) -> Result<Vec<BasicToken>, AppErr> {
+pub fn get_basic_tokens(content: String) -> Result<Vec<BasicToken>, ErrApp> {
     let chars: Vec<char> = content.chars().collect();
     let mut toks: Vec<BasicToken> = vec![];
     let mut l: Lexer<char> = Lexer::new(chars);

@@ -1,11 +1,9 @@
 use crate::{
-    app_err,
     compiler::{
         lexer::Lexer,
-        parser::{DataType, ParserErr, stringify_data_type},
+        parser::{DataType, ErrParser, stringify_data_type},
         tokenizer::AdvancedToken,
-    },
-    err::{AppErr, AppErrKind},
+    }, fail,
 };
 
 #[derive(Clone, Debug)]
@@ -18,7 +16,7 @@ pub struct Variable {
 }
 
 impl Variable {
-    pub fn new(toks: Vec<AdvancedToken>) -> Result<Variable, AppErr> {
+    pub fn new(toks: Vec<AdvancedToken>) -> Result<Variable, ErrParser> {
         let toks_clone = toks
             .iter()
             .map(|t| {
@@ -34,16 +32,13 @@ impl Variable {
                 var_name = name.clone();
             }
             _ => {
-                return Err(app_err!(AppErrKind::Parser(ParserErr::MalformedVariable(
-                    String::from("expected 1st token from 'let' keyword to be of type Indicator")
-                ))));
+                return fail!(ErrParser::MalformedVariable, "expected 1st token from 'let' keyword to be of type Indicator");
             }
         }
         let tok2 = l.peek(2);
         if !matches!(tok2, AdvancedToken::Colon) {
-            return Err(app_err!(AppErrKind::Parser(ParserErr::MalformedVariable(
-                String::from("expected 2nd token from 'let' keyword to be of type Colon")
-            ))));
+            return fail!(ErrParser::MalformedVariable, "expected 2nd token from 'let' keyword to be of type Colon");
+
         }
         let tok3 = l.peek(3);
         match tok3 {
@@ -60,20 +55,12 @@ impl Variable {
                 var_data_type = DataType::Str;
             }
             _ => {
-                return Err(app_err!(AppErrKind::Parser(ParserErr::MalformedVariable(
-                    String::from(
-                        "expected 3rd token from 'let' keyword to be of one of the following types: Indicator, Str, Bool, or Num"
-                    )
-                ))));
+                return fail!(ErrParser::MalformedVariable, "expected 3rd token from 'let' keyword to be of one of the following types: Indicator, Str, Bool, or Num");
             }
         }
         let tok4 = l.peek(4);
         if !matches!(tok4, AdvancedToken::OperatorAssignment) {
-            return Err(app_err!(AppErrKind::Parser(ParserErr::MalformedVariable(
-                String::from(
-                    "expected 4th token from 'let' keyword to be of type OperatorAssignment"
-                )
-            ))));
+            return fail!(ErrParser::MalformedVariable, "expected 4th token from 'let' keyword to be of type OperatorAssignment");
         }
         // this is where the value should begin
         l.next_by(5);
@@ -85,9 +72,7 @@ impl Variable {
                 break;
             }
             if l.at_end() {
-                return Err(app_err!(AppErrKind::Parser(ParserErr::MalformedVariable(
-                    String::from("failed to located a semicolon for variable")
-                ))));
+                return fail!(ErrParser::MalformedVariable, "failed to located a semicolon for variable");
             }
             l.next();
         }

@@ -7,10 +7,7 @@ use reqwest::blocking::{Client, Response};
 use serde::Deserialize;
 use serde_json::json;
 
-use crate::{
-    app_err,
-    err::{AppErr, AppErrKind},
-};
+use crate::{err::{ErrApp, ErrMsg}, err_msg, fail};
 
 pub const OLLAMA_ADDR: &str = "http://localhost:11434";
 
@@ -18,14 +15,14 @@ pub fn is_ollama_installed() -> bool {
     Command::new("ollama").arg("--version").output().is_ok()
 }
 
-pub fn err_if_no_ollama() -> Result<(), AppErr> {
+pub fn err_if_no_ollama() -> Result<(), ErrLlm> {
     if !is_ollama_installed() {
-        return Err(app_err!(AppErrKind::Llm(LlmErr::OllamaNotInstalled)));
+        return Err(ErrLlm::OllamaNotInstalled(err_msg!("")).into());
     }
     Ok(())
 }
 
-pub fn get_installed_ollama_models() -> Result<Vec<String>, AppErr> {
+pub fn get_installed_ollama_models() -> Result<Vec<String>, ErrLlm> {
     let mut model_names: Vec<String> = vec![];
     let out = Command::new("ollama").arg("list").output();
     match out {
@@ -47,36 +44,28 @@ pub fn get_installed_ollama_models() -> Result<Vec<String>, AppErr> {
             }
         }
         Err(err) => {
-            return Err(app_err!(AppErrKind::Llm(LlmErr::UnexpectedCliErr(
-                format!("{:?}", err)
-            ))));
+            return fail!(ErrLlm::OllamaError, "ollama failed internally, here is the error: {}", err);
         }
     }
     return Ok(model_names);
 }
 
-#[derive(Debug)]
-pub enum LlmErr {
-    OllamaNotInstalled,
-    UnexpectedCliErr(String),
-    HttpRequestFailure(String),
+#[derive(Debug, thiserror::Error)]
+pub enum ErrLlm {
+
+    #[error("{0}\nollama is not installed and is required")]
+    OllamaNotInstalled(ErrMsg),
+
+    #[error("{0}\nerror which originated from ollama cli during execution")]
+    OllamaError(ErrMsg),
+
+    #[error("{0} http request to ollama failed")]
+    HttpRequestFailure(ErrMsg),
+
 }
 
-pub fn handle_err(err: LlmErr) {
-    match err {
-        LlmErr::OllamaNotInstalled => {
-            eprintln!("ollama is not installed and is required")
-        }
-        LlmErr::UnexpectedCliErr(s) => {
-            eprintln!("an unexpected cli error occured: {}", s);
-        }
-        LlmErr::HttpRequestFailure(s) => {
-            eprintln!("a request to the llm has failed: {}", s);
-        }
-    }
-}
 
-pub fn stream_prompt(client: &Client, model: &str, prompt: &str) -> Result<OllamaResponse, AppErr> {
+pub fn stream_prompt(client: &Client, model: &str, prompt: &str) -> Result<OllamaResponse, ErrLlm> {
     let result = client
         .post(OLLAMA_ADDR.to_string() + "/api/generate")
         .json(&json!({
@@ -86,15 +75,13 @@ pub fn stream_prompt(client: &Client, model: &str, prompt: &str) -> Result<Ollam
         }))
         .send();
     let response: Response;
-    let mut err: Option<AppErr>;
+    let mut err: Option<ErrLlm>;
     match result {
         Ok(r) => {
             response = r;
         }
         Err(e) => {
-            return Err(app_err!(AppErrKind::Llm(LlmErr::HttpRequestFailure(
-                format!("{:?}", e)
-            ))));
+            return fail!(ErrLlm::HttpRequestFailure, "ollama http request failed, here is the internal ollama error: {}", e);
         }
     };
 
@@ -111,9 +98,7 @@ pub fn stream_prompt(client: &Client, model: &str, prompt: &str) -> Result<Ollam
                 trimmed_line = line;
             }
             Err(e) => {
-                return Err(app_err!(AppErrKind::Llm(LlmErr::HttpRequestFailure(
-                    format!("{:?}", e)
-                ))));
+                return fail!(ErrLlm::HttpRequestFailure, "ollama http request failed, here is the internal ollama error: {}", e);
             }
         }
         let chunck: Result<OllamaResponseChunk, serde_json::Error> =

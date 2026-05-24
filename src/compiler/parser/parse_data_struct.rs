@@ -1,16 +1,16 @@
 use crate::{
-    app_err,
     compiler::{
         lexer::Lexer,
         node::{self, DataStruct},
-        parser::ParserErr,
+        parser::ErrParser,
         tokenizer::AdvancedToken,
     },
-    err::{AppErr, AppErrKind},
+    fail,
 };
 
-pub fn parse_data_struct(l: &mut Lexer<AdvancedToken>) -> Result<DataStruct, AppErr> {
+pub fn parse_data_struct(l: &mut Lexer<AdvancedToken>) -> Result<DataStruct, ErrParser> {
     let mut is_struct_keyword = false;
+
     if matches!(l.peek(1), AdvancedToken::Indicator(_)) {
         if matches!(l.peek(2), AdvancedToken::OpenedCurlyBrace) {
             if matches!(l.peek(3), AdvancedToken::Indicator(_)) {
@@ -18,30 +18,38 @@ pub fn parse_data_struct(l: &mut Lexer<AdvancedToken>) -> Result<DataStruct, App
             }
         }
     }
+
     if !is_struct_keyword {
-        return Err(app_err!(AppErrKind::Parser(
-            ParserErr::MissingOpeningCurlyBrace(String::from(
-                "expected to find opening curly brace after data keyword but failed to find it"
-            ))
-        )));
+        return fail!(
+            ErrParser::MissingOpeningCurlyBrace,
+            "expected to find opening curly brace after data keyword but failed to find it"
+        );
     }
+
     l.mark();
+
     loop {
         if matches!(l.item(), AdvancedToken::SemiColon) {
             break;
         }
+
         if l.at_end() {
-            return Err(app_err!(AppErrKind::Parser(ParserErr::MissingSemiColon(
-                String::from(
-                    "expected to find a closing curly brace for our data keyword but failed to find it"
-                )
-            ))));
+            return fail!(
+                ErrParser::MissingSemiColon,
+                "expected semicolon after data structure declaration"
+            );
         }
+
         l.next();
     }
+
     l.next();
+
     let node_data_type_toks = l.collect(l.marked_pos(), l.pos());
+
     l.prev();
+
     let node_data_struct = node::DataStruct::new(node_data_type_toks)?;
+
     Ok(node_data_struct)
 }
