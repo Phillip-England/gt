@@ -9,6 +9,7 @@ pub fn run(filepath: String, model: String) -> Result<(), ErrApp> {
     let content = read_to_string(filepath)?;
     let toks = tokenize(content)?;
     let ast = Ast::new(toks)?;
-    let _ = interpret_ast(ast, model)?;
+    println!("{:?}", ast.vec_prompts);
+    // let _ = interpret_ast(ast, model)?;
     Ok(())
 }

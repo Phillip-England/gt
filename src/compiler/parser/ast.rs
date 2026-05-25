@@ -4,10 +4,10 @@ use crate::{
     compiler::{
         lexer::Lexer,
         node::{DataStruct, Node, Variable},
-        parser::{ErrParser, parse_data_struct, parse_variable},
+        parser::{DataType, ErrParser, parse_data_struct, parse_variable},
         tokenizer::AdvancedToken, validator::ErrValidator,
     },
-    err::ErrApp, fail, interpreter::ErrInterpreter,
+    err::ErrApp, fail, interpreter::ErrInterpreter, llm::Prompt,
 };
 
 #[derive(Debug, Clone)]
@@ -15,6 +15,7 @@ pub struct Ast {
     pub head_nodes: Vec<Node>,
     pub map_structs: HashMap<String, DataStruct>,
     pub map_vars: HashMap<String, Variable>,
+    pub vec_prompts: Vec<Prompt>,
 }
 
 impl Ast {
@@ -24,9 +25,11 @@ impl Ast {
             head_nodes: vec![],
             map_structs: HashMap::new(),
             map_vars: HashMap::new(),
+            vec_prompts: Vec::new(),
         };
         ast.extract_head_nodes(toks)?;
         ast.load_ast_hashmaps()?;
+        ast.load_prompts()?;
         return Ok(ast);
     }
 
@@ -106,5 +109,30 @@ impl Ast {
         }
         return Ok(());
     }
+
+    pub fn load_prompts(&mut self) -> Result<(), ErrApp> {
+        let prompts: Vec<Prompt> = self.map_vars
+            .iter()            
+            .filter_map(|(_, variable)| match variable.data_type {
+                DataType::Custom(_) => {
+                    let prompt_toks: Vec<&AdvancedToken> = variable
+                        .toks
+                        .iter()
+                        .filter(|tok| matches!(tok, AdvancedToken::PromptValue(_)))
+                        .collect();
+
+                    if prompt_toks.is_empty() {
+                        None
+                    } else {
+                        return Some(Prompt::new(variable.name.clone(), variable.value.clone()));
+                    }
+                }
+
+                _ => None,
+            })
+            .collect();
+        self.vec_prompts = prompts;
+        Ok(())
+    }   
 
 }

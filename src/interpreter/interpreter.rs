@@ -26,74 +26,49 @@ pub struct Interpreter {
 
 
 pub fn interpret_ast(ast: Ast, model: String) -> Result<(), ErrApp> {
-    let mut data_struct_map: HashMap<String, DataStruct> = HashMap::new();
-    let mut variable_map: HashMap<String, Variable> = HashMap::new();
 
+    // err_if_no_ollama()?;
 
-    // extracting our prompts
-    let prompts: Vec<Variable> = variable_map
-        .into_iter()
-        .filter_map(|(_, variable)| match variable.data_type {
-            DataType::Custom(_) => {
-                let prompt_toks: Vec<&AdvancedToken> = variable
-                    .toks
-                    .iter()
-                    .filter(|tok| matches!(tok, AdvancedToken::PromptValue(_)))
-                    .collect();
+    // let _models = get_installed_ollama_models()?;
+    // let client = Client::new();
 
-                if prompt_toks.is_empty() {
-                    None
-                } else {
-                    Some(variable)
-                }
-            }
+    // for p in prompts.iter() {
+    //     let data_type_struct: &DataStruct = match data_struct_map.get(&p.data_type_str) {
+    //         Some(s) => s,
+    //         None => {
+    //             return fail!(
+    //                 ErrValidator::InvalidVariableType,
+    //                 "invalid variable type: {}",
+    //                 p.data_type_str
+    //             );
+    //         }
+    //     };
 
-            _ => None,
-        })
-        .collect();
+    //     let substruct_names =
+    //         data_type_struct.get_substruct_names(vec![], &data_struct_map, data_type_struct)?;
 
-    err_if_no_ollama()?;
+    //     println!("{:?}", substruct_names);
 
-    let _models = get_installed_ollama_models()?;
-    let client = Client::new();
+    //     let substructs: Vec<&DataStruct> = data_struct_map
+    //         .iter()
+    //         .filter_map(|(_, data_struct)| {
+    //             if substruct_names.contains(&data_struct.name) {
+    //                 Some(data_struct)
+    //             } else {
+    //                 None
+    //             }
+    //         })
+    //         .collect();
 
-    for p in prompts.iter() {
-        let data_type_struct: &DataStruct = match data_struct_map.get(&p.data_type_str) {
-            Some(s) => s,
-            None => {
-                return fail!(
-                    ErrValidator::InvalidVariableType,
-                    "invalid variable type: {}",
-                    p.data_type_str
-                );
-            }
-        };
+    //     println!("{:?}", substructs);
 
-        let substruct_names =
-            data_type_struct.get_substruct_names(vec![], &data_struct_map, data_type_struct)?;
+    //     let res = stream_prompt(&client, &model, &p.value, |chunk| {
+    //         println!("{:?}", chunk);
+    //     })?;
 
-        println!("{:?}", substruct_names);
-
-        let substructs: Vec<&DataStruct> = data_struct_map
-            .iter()
-            .filter_map(|(_, data_struct)| {
-                if substruct_names.contains(&data_struct.name) {
-                    Some(data_struct)
-                } else {
-                    None
-                }
-            })
-            .collect();
-
-        println!("{:?}", substructs);
-
-        let res = stream_prompt(&client, &model, &p.value, |chunk| {
-            println!("{:?}", chunk);
-        })?;
-
-        // response validation
-        println!("{:?}", res.text);
-    }
+    //     // response validation
+    //     println!("{:?}", res.text);
+    // }
 
     Ok(())
 }
